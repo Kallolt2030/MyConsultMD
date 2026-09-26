@@ -1,0 +1,7 @@
+{
+  "name": "MyConsultMD",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
