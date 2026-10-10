@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MyConsult MD</string>
+    <string name="title_activity_main">MyConsult MD</string>
+    <string name="package_name">com.myconsult.md</string>
+    <string name="custom_url_scheme">com.myconsult.md</string>
+</resources>
