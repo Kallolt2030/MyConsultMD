@@ -1,81 +1,156 @@
 import { Routes } from '@angular/router';
+
+// Guards
+import { authGuard } from './core/guards/auth-guard';
+import { noAuthGuard } from './core/guards/no-auth-guard';
 import { setupGuard } from './core/guards/setup-guard';
 
+// Autenticación
+import { LoginPage } from './features/auth/login/login.page';
+import { RegisterPage } from './features/auth/register/register.page';
+
+// Configuración inicial
+import { SetupPage } from './features/setup/setup.page';
+
+// Navegación principal
+import { TabsPage } from './features/tabs/tabs.page';
+
+// Inicio
+import { InicioPage } from './features/inicio/inicio.page';
+
+// Citas
+import { NuevaCitaPage } from './features/citas/nueva-cita/nueva-cita.page';
+import { DetalleCitaPage } from './features/citas/detalle-cita/detalle-cita.page';
+import { EditarCitaPage } from './features/citas/editar-cita/editar-cita.page';
+
+// Pacientes
+import { RegistrarPacientePage } from './features/pacientes/registrar-paciente/registrar-paciente.page';
+import { ListaPacientesPage } from './features/pacientes/lista-pacientes/lista-pacientes.page';
+import { DetallePacientePage } from './features/pacientes/detalle-paciente/detalle-paciente.page';
+
+// Historial y configuración
+import { HistorialPage } from './features/historial/historial.page';
+import { ConfiguracionPage } from './features/configuracion/configuracion.page';
+
+// Recordatorios
+import { ConfigRecordatoriosPage } from './features/recordatorios/config-recordatorios/config-recordatorios.page';
+import { EnviarRecordatorioPage } from './features/recordatorios/enviar-recordatorio/enviar-recordatorio.page';
+
+// Notificaciones
+import { NotificacionesPage } from './features/notificaciones/notificaciones.page';
+
 export const routes: Routes = [
+  // Redirección inicial
   {
     path: '',
-    redirectTo: 'tabs',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
 
+  // Autenticación: usuarios sin sesión
   {
-    path: 'setup',
-    loadComponent: () => import('./features/setup/setup.page').then(m => m.SetupPage),
+    path: 'login',
+    component: LoginPage,
+    canActivate: [noAuthGuard],
+  },
+  {
+    path: 'register',
+    component: RegisterPage,
+    canActivate: [noAuthGuard],
   },
 
-  
+  // Configuración inicial del consultorio
+  {
+    path: 'setup',
+    component: SetupPage,
+    canActivate: [authGuard],
+  },
 
-
-
+  // Navegación principal: requiere sesión y configuración completada
   {
     path: 'tabs',
-    loadComponent: () => import('./features/tabs/tabs.page').then(m => m.TabsPage),
-    canActivate: [setupGuard],
+    component: TabsPage,
+    canActivate: [authGuard, setupGuard],
     children: [
-      { path: '',                redirectTo: 'inicio', pathMatch: 'full' },
-      { path: 'inicio',          loadComponent: () => import('./features/inicio/inicio.page').then(m => m.InicioPage) },
-      { path: 'agenda',          loadComponent: () => import('./features/agenda/agenda.page').then(m => m.AgendaPage) },
-      { path: 'lista-pacientes', loadComponent: () => import('./features/pacientes/lista-pacientes/lista-pacientes.page').then(m => m.ListaPacientesPage) },
-      { path: 'historial',       loadComponent: () => import('./features/historial/historial.page').then(m => m.HistorialPage) },
-      { path: 'configuracion',   loadComponent: () => import('./features/configuracion/configuracion.page').then(m => m.ConfiguracionPage) },
+      {
+        path: '',
+        redirectTo: 'inicio',
+        pathMatch: 'full',
+      },
+      {
+        path: 'inicio',
+        component: InicioPage,
+      },
+      {
+        path: 'agenda',
+        component: (NuevaCitaPage as any) && undefined,
+      },
+      {
+        path: 'lista-pacientes',
+        component: ListaPacientesPage,
+      },
+      {
+        path: 'historial',
+        component: HistorialPage,
+      },
+      {
+        path: 'configuracion',
+        component: ConfiguracionPage,
+      },
     ],
   },
 
+  // Gestión de citas: requiere autenticación
   {
     path: 'nueva-cita',
-    loadComponent: () => import('./features/citas/nueva-cita/nueva-cita.page').then(m => m.NuevaCitaPage),
+    component: NuevaCitaPage,
+    canActivate: [authGuard, setupGuard],
   },
   {
     path: 'detalle-cita/:id',
-    loadComponent: () => import('./features/citas/detalle-cita/detalle-cita.page').then(m => m.DetalleCitaPage),
+    component: DetalleCitaPage,
+    canActivate: [authGuard, setupGuard],
   },
   {
     path: 'editar-cita/:id',
-    loadComponent: () => import('./features/citas/editar-cita/editar-cita.page').then(m => m.EditarCitaPage),
+    component: EditarCitaPage,
+    canActivate: [authGuard, setupGuard],
   },
 
-
-
-
+  // Gestión de pacientes: requiere autenticación
   {
     path: 'registrar-paciente',
-    loadComponent: () => import('./features/pacientes/registrar-paciente/registrar-paciente.page').then(m => m.RegistrarPacientePage),
+    component: RegistrarPacientePage,
+    canActivate: [authGuard, setupGuard],
   },
   {
     path: 'detalle-paciente/:id',
-    loadComponent: () => import('./features/pacientes/detalle-paciente/detalle-paciente.page').then(m => m.DetallePacientePage),
+    component: DetallePacientePage,
+    canActivate: [authGuard, setupGuard],
   },
 
-
-
-
+  // Recordatorios: requiere autenticación
   {
     path: 'config-recordatorios',
-    loadComponent: () => import('./features/recordatorios/config-recordatorios/config-recordatorios.page').then(m => m.ConfigRecordatoriosPage),
+    component: ConfigRecordatoriosPage,
+    canActivate: [authGuard, setupGuard],
   },
   {
     path: 'enviar-recordatorio/:id',
-    loadComponent: () => import('./features/recordatorios/enviar-recordatorio/enviar-recordatorio.page').then(m => m.EnviarRecordatorioPage),
+    component: EnviarRecordatorioPage,
+    canActivate: [authGuard, setupGuard],
   },
 
-
-
-  
+  // Notificaciones: requiere autenticación y configuración
   {
     path: 'notificaciones',
-    loadComponent: () => import('./features/notificaciones/notificaciones.page').then(m => m.NotificacionesPage),
+    component: NotificacionesPage,
+    canActivate: [authGuard, setupGuard],
   },
 
-  // 🔹 Comodín 404 (opcional pero recomendado)
-  { path: '**', redirectTo: 'tabs' },
+  // Ruta no encontrada
+  {
+    path: '**',
+    redirectTo: 'tabs',
+  },
 ];

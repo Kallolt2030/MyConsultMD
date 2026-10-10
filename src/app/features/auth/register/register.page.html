@@ -1,0 +1,137 @@
+<ion-content class="ion-padding auth-content">
+  <div class="mx-auto mt-6 w-full max-w-md space-y-6">
+
+    <div class="space-y-2">
+      <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-medical-100">
+        <ion-icon
+          name="person-add-outline"
+          class="text-3xl text-medical-600">
+        </ion-icon>
+      </div>
+
+      <h1>Crear cuenta</h1>
+      <p>Bienvenido a MyConsult MD. Registra tu cuenta para comenzar a administrar tu consultorio.</p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="field">
+        <ion-label>Correo electrónico</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="tu@correo.com"
+            [(ngModel)]="email">
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <div class="field">
+        <ion-label>Contraseña</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="password"
+            [type]="mostrarPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            placeholder="Crea una contraseña"
+            [(ngModel)]="password">
+          </ion-input>
+
+          <ion-button
+            slot="end"
+            fill="clear"
+            type="button"
+            color="medium"
+            aria-label="Mostrar u ocultar contraseña"
+            (click)="mostrarPassword = !mostrarPassword">
+            <ion-icon
+              slot="icon-only"
+              [name]="mostrarPassword ? 'eye-off-outline' : 'eye-outline'">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+
+      <div class="field">
+        <ion-label>Confirmar contraseña</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="confirmPassword"
+            [type]="mostrarConfirmPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            placeholder="Repite tu contraseña"
+            [(ngModel)]="confirmPassword">
+          </ion-input>
+
+          <ion-button
+            slot="end"
+            fill="clear"
+            type="button"
+            color="medium"
+            aria-label="Mostrar u ocultar confirmación de contraseña"
+            (click)="mostrarConfirmPassword = !mostrarConfirmPassword">
+            <ion-icon
+              slot="icon-only"
+              [name]="mostrarConfirmPassword ? 'eye-off-outline' : 'eye-outline'">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- Aceptación del aviso de privacidad -->
+    <div class="rounded-xl border border-border bg-white p-4">
+      <ion-checkbox
+        name="aceptaPrivacidad"
+        [(ngModel)]="aceptaPrivacidad"
+        labelPlacement="end"
+        alignment="start">
+        <span class="text-sm text-text-primary">
+          He leído y acepto el
+          <a
+            href="#"
+            class="font-semibold text-medical-600 underline"
+            (click)="$event.preventDefault(); mostrarPrivacidad = true">
+            aviso de privacidad
+          </a>
+        </span>
+      </ion-checkbox>
+
+      <p class="mt-2 text-caption">
+        Debes aceptar el aviso para poder crear tu cuenta.
+      </p>
+    </div>
+
+    <div
+      *ngIf="error"
+      class="rounded-lg border border-status-cancelled-bg bg-status-cancelled-bg p-3">
+      <p class="text-sm text-status-cancelled">{{ error }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="onSubmit()"
+      [disabled]="cargando || !aceptaPrivacidad">
+
+      <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+
+      <span *ngIf="!cargando">Crear mi cuenta</span>
+    </button>
+
+    <p class="text-center text-sm">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login" class="font-semibold text-medical-600 underline">
+        Inicia sesión
+      </a>
+    </p>
+
+  </div>
+</ion-content>
+
+<app-privacy-notice
+  [isOpen]="mostrarPrivacidad"
+  (cerrar)="mostrarPrivacidad = false"
+  (aceptar)="aceptarAvisoPrivacidad()">
+</app-privacy-notice>

@@ -1,1 +1,252 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
+
+/* ========================================
+   TEMA GLOBAL: MYCONSULT MD
+======================================== */
+
+@theme {
+  /* Tipografía */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --text-h1: 24px;
+  --text-h1--line-height: 32px;
+
+  --text-h2: 20px;
+  --text-h2--line-height: 28px;
+
+  --text-h3: 18px;
+  --text-h3--line-height: 24px;
+
+  --text-body-1: 16px;
+  --text-body-1--line-height: 24px;
+
+  --text-body-2: 14px;
+  --text-body-2--line-height: 20px;
+
+  --text-btn: 15px;
+  --text-btn--line-height: 20px;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+
+  --text-nav: 11px;
+  --text-nav--line-height: 14px;
+
+  /* Azul médico */
+  --color-medical-50: #F2F6FB;
+  --color-medical-100: #E3ECF6;
+  --color-medical-200: #C5D7EA;
+  --color-medical-500: #3B6B9E;
+  --color-medical-600: #2D5080;
+  --color-medical-700: #244267;
+  --color-medical-800: #1B3452;
+
+  /* Fondos y superficies */
+  --color-surface: #FFFFFF;
+  --color-app-bg: #F5F7FA;
+  --color-border: #E2E8F0;
+
+  /* Texto */
+  --color-text-primary: #263445;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+
+  /* Estados: pendiente */
+  --color-status-pending: #B7791F;
+  --color-status-pending-bg: #FFF4D6;
+
+  /* Estados: realizada */
+  --color-status-completed: #27805A;
+  --color-status-completed-bg: #DDF5E8;
+
+  /* Estados: cancelada y errores */
+  --color-status-cancelled: #C24141;
+  --color-status-cancelled-bg: #FDE8E8;
+}
+
+/* ========================================
+   ESTILOS BASE
+======================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    @apply min-h-screen bg-app-bg font-sans text-body-1 text-text-primary antialiased;
+  }
+
+  h1 {
+    @apply text-h1 font-bold text-text-primary;
+  }
+
+  h2 {
+    @apply text-h2 font-semibold text-text-primary;
+  }
+
+  h3 {
+    @apply text-h3 font-semibold text-text-primary;
+  }
+
+  p {
+    @apply text-text-secondary;
+  }
+
+  label {
+    @apply mb-1 block text-body-2 font-medium text-text-primary;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply w-full rounded-lg border border-border bg-white px-3 py-2.5 text-body-1 text-text-primary outline-none transition-colors;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-text-muted;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply border-medical-500 ring-2 ring-medical-100;
+  }
+
+  button,
+  a {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-medical-500;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+}
+
+/* ========================================
+   COMPONENTES REUTILIZABLES
+======================================== */
+
+@layer components {
+  /* Botón principal */
+  .btn-primary {
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-lg bg-medical-600 px-4 py-3 text-center text-btn font-semibold text-white transition-colors hover:bg-medical-700 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Botón secundario */
+  .btn-secondary {
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-3 text-center text-btn font-medium text-text-primary transition-colors hover:bg-medical-50;
+  }
+
+  /* Botón de acción discreta */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-btn font-medium text-medical-600 transition-colors hover:bg-medical-50;
+  }
+
+  /* Campos de formulario */
+  .field {
+    @apply flex flex-col gap-1.5;
+  }
+
+  /* Tarjetas */
+  .card {
+    @apply rounded-xl border border-border bg-surface p-4 shadow-sm;
+  }
+
+  /* Etiquetas de estado */
+  .badge-status {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption font-semibold;
+  }
+
+  .badge-pending {
+    @apply bg-status-pending-bg text-status-pending;
+  }
+
+  .badge-completed {
+    @apply bg-status-completed-bg text-status-completed;
+  }
+
+  .badge-cancelled {
+    @apply bg-status-cancelled-bg text-status-cancelled;
+  }
+
+  /* Navegación */
+  .bottom-nav {
+    @apply fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white;
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center gap-1 px-2 py-2 text-nav text-text-muted transition-colors;
+  }
+
+  .nav-item-active {
+    @apply font-semibold text-medical-600;
+  }
+
+  /* Mensajes de error */
+  .error-text {
+    @apply mt-1 text-caption text-status-cancelled;
+  }
+
+  /* Mensajes informativos */
+  .info-text {
+    @apply text-caption text-medical-600;
+  }
+}
+
+
+
+/* ========================================
+   INTEGRACIÓN IONIC + MYCONSULT MD
+======================================== */
+
+@layer components {
+  ion-toolbar.auth-toolbar {
+    --background: #2D5080;
+    --color: #FFFFFF;
+    --border-width: 0;
+  }
+
+  ion-content.auth-content {
+    --background: #F5F7FA;
+  }
+
+  ion-item.auth-input {
+    --background: #FFFFFF;
+    --color: #263445;
+    --border-color: #E2E8F0;
+    --border-style: solid;
+    --border-width: 1px;
+    --border-radius: 12px;
+    --padding-start: 12px;
+    --inner-padding-end: 8px;
+    --min-height: 54px;
+  }
+
+  ion-item.auth-input ion-input {
+    --color: #263445;
+    --placeholder-color: #94A3B8;
+    --highlight-color-focused: #3B6B9E;
+  }
+
+  ion-item.auth-input ion-button {
+    --color: #3B6B9E;
+    --padding-start: 8px;
+    --padding-end: 4px;
+  }
+
+  ion-checkbox {
+    --checkbox-background-checked: #2D5080;
+    --border-color-checked: #2D5080;
+    --checkmark-color: #FFFFFF;
+    --border-radius: 5px;
+  }
+}

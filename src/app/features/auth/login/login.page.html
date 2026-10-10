@@ -1,0 +1,85 @@
+<ion-content class="ion-padding auth-content">
+  <div class="mx-auto mt-8 w-full max-w-md space-y-6">
+
+    <div class="space-y-2">
+      <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-medical-100">
+        <ion-icon
+          
+          name="medkit-outline"
+          class="text-3xl text-medical-600 mask-center">
+        </ion-icon>
+      </div>
+
+      <h1>Hola de nuevo</h1>
+      <p>Ingresa con tu cuenta para administrar tu consultorio.</p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="field">
+        <ion-label>Correo electrónico</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="email"
+            labelPlacement="stacked"
+            type="email"
+            autocomplete="email"
+            placeholder="tu@correo.com"
+            [(ngModel)]="email">
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <div class="field">
+        <ion-label>Contraseña</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="password"
+            labelPlacement="stacked"
+            [type]="mostrarPassword ? 'text' : 'password'"
+            autocomplete="current-password"
+            placeholder="Ingresa tu contraseña"
+            [(ngModel)]="password">
+          </ion-input>
+
+          <ion-button
+            slot="end"
+            fill="clear"
+            type="button"
+            color="medium"
+            aria-label="Mostrar u ocultar contraseña"
+            (click)="mostrarPassword = !mostrarPassword">
+            <ion-icon
+              slot="icon-only"
+              [name]="mostrarPassword ? 'eye-off-outline' : 'eye-outline'">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+    </div>
+
+    <div
+      *ngIf="error"
+      class="rounded-lg border border-status-cancelled-bg bg-status-cancelled-bg p-3">
+      <p class="text-sm text-status-cancelled">{{ error }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="onSubmit()"
+      [disabled]="cargando">
+
+      <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+
+      <span *ngIf="!cargando">Iniciar sesión</span>
+    </button>
+
+    <p class="text-center text-sm">
+      ¿No tienes cuenta?
+      <a routerLink="/register" class="font-semibold text-medical-600 underline">
+        Regístrate
+      </a>
+    </p>
+
+  </div>
+</ion-content>
