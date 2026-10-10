@@ -2,12 +2,12 @@
   <div class="mx-auto mt-8 w-full max-w-md space-y-6">
 
     <div class="space-y-2">
-      <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-medical-100">
-        <ion-icon
-          
-          name="medkit-outline"
-          class="text-3xl text-medical-600 mask-center">
-        </ion-icon>
+      <div class="flex justify-center">
+        <img
+          src="assets/img/play_store_512.png"
+          alt="MyConsult MD"
+          class="h-30 w-30 rounded-2xl object-cover"
+        />
       </div>
 
       <h1>Hola de nuevo</h1>
@@ -63,7 +63,7 @@
       <p class="text-sm text-status-cancelled">{{ error }}</p>
     </div>
 
-    <button
+    <ion-button
       type="button"
       class="btn-primary"
       (click)="onSubmit()"
@@ -72,7 +72,7 @@
       <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
 
       <span *ngIf="!cargando">Iniciar sesión</span>
-    </button>
+    </ion-button>
 
     <p class="text-center text-sm">
       ¿No tienes cuenta?
