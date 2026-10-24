@@ -1,13 +1,35 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>tabs</ion-title>
-  </ion-toolbar>
-</ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">tabs</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+<ion-tabs>
+  <ion-tab-bar slot="bottom" class="medical-tab-bar">
+
+    <ion-tab-button tab="inicio" href="/tabs/inicio">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Inicio</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="agenda" href="/tabs/agenda">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <ion-label>Agenda</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="lista-pacientes"
+      href="/tabs/lista-pacientes">
+      <ion-icon name="people-outline"></ion-icon>
+      <ion-label>Pacientes</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="historial" href="/tabs/historial">
+      <ion-icon name="time-outline"></ion-icon>
+      <ion-label>Historial</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="configuracion"
+      href="/tabs/configuracion">
+      <ion-icon name="settings-outline"></ion-icon>
+      <ion-label>Configuración</ion-label>
+    </ion-tab-button>
+
+  </ion-tab-bar>
+</ion-tabs>

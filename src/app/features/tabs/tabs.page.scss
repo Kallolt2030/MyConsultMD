@@ -1,0 +1,9 @@
+ion-tabs {
+  --ion-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.medical-tab-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  box-sizing: content-box;
+}

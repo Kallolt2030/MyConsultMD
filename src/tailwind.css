@@ -1,1 +1,104 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
+
+
+
+
+
+/* ========================================
+   INTEGRACIÓN IONIC + MYCONSULT MD
+======================================== */
+
+@layer components {
+  ion-toolbar.auth-toolbar {
+    --background: #2D5080;
+    --color: #FFFFFF;
+    --border-width: 0;
+  }
+
+  
+
+  ion-item.auth-input {
+    --background: #FFFFFF;
+    --color: #263445;
+    --border-color: #E2E8F0;
+    --border-style: solid;
+    --border-width: 1px;
+    --border-radius: 12px;
+    --padding-start: 12px;
+    --inner-padding-end: 8px;
+    --min-height: 54px;
+  }
+
+  ion-item.auth-input ion-input {
+    --color: #263445;
+    --placeholder-color: #94A3B8;
+    --highlight-color-focused: #3B6B9E;
+  }
+
+  ion-item.auth-input ion-button {
+    --color: #3B6B9E;
+    --padding-start: 8px;
+    --padding-end: 4px;
+  }
+
+  ion-checkbox {
+    --checkbox-background-checked: #2D5080;
+    --border-color-checked: #2D5080;
+    --checkmark-color: #FFFFFF;
+    --border-radius: 5px;
+  }
+
+}
+
+
+  ion-button{
+    --background: #2D5080;
+    --color: #FFFFFF;
+    --border-radius: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  }
+
+  /* ========================================
+   ESPACIADO GLOBAL DE IONIC
+======================================== */
+
+/* Fondo y área de contenido */
+ion-content {
+  --background: #F5F7FA;
+}
+
+/* Espaciado para el contenido de las páginas */
+ion-content .ion-padding {
+  padding: 20px 16px;
+}
+
+/* Evita que los formularios queden pegados
+   a los bordes en pantallas pequeñas */
+ion-content form {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Evita que los campos desborden su contenedor */
+ion-item,
+ion-input,
+ion-select,
+ion-textarea {
+  box-sizing: border-box;
+}
+
+
+/* En celulares pequeños */
+@media (max-width: 480px) {
+  ion-content .ion-padding {
+    padding: 18px 16px;
+  }
+}

@@ -1,0 +1,90 @@
+<ion-content class="ion-padding auth-content">
+  <div class="mx-auto mt-8 w-full max-w-md space-y-6 p-2 pt-2.5">
+
+    <div class="space-y-2 mt-8 p-6 mb-4">
+      <div class="flex justify-center mb-4 ">
+        <img
+          src="assets/img/play_store_512.png"
+          alt="MyConsult MD"
+          class="h-30 w-30 rounded-2xl object-cover"
+        />
+      </div>
+
+      <h1>Hola de nuevo</h1>
+      <p>Ingresa con tu cuenta para administrar tu consultorio.</p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="field">
+        <ion-label class="text-gray-600">Correo electrónico</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="email"
+            labelPlacement="stacked"
+            type="email"
+            autocomplete="email"
+            placeholder="tu@correo.com"
+            [(ngModel)]="email"
+            #emailRef="ngModel"
+            email
+            required>
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <div class="field">
+        <ion-label class="text-gray-600">Contraseña</ion-label>
+        <ion-item lines="none" class="auth-input">
+          <ion-input
+            name="password"
+            labelPlacement="stacked"
+            [type]="mostrarPassword ? 'text' : 'password'"
+            autocomplete="current-password"
+            placeholder="Ingresa tu contraseña"
+            [(ngModel)]="password">
+          </ion-input>
+
+          <ion-button
+            slot="end"
+            fill="clear"
+            type="button"
+            color="medium"
+            aria-label="Mostrar u ocultar contraseña"
+            (click)="mostrarPassword = !mostrarPassword">
+            <ion-icon
+              slot="icon-only"
+              [name]="mostrarPassword ? 'eye-off-outline' : 'eye-outline'">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+    </div>
+
+    <div
+      *ngIf="error"
+      class="rounded-lg border border-status-cancelled-bg bg-status-cancelled-bg p-3">
+      <p class="text-sm text-status-cancelled">{{ error }}</p>
+    </div>
+
+   <div class="flex justify-center w-full">
+     <ion-button
+      type="button"
+      class="btn-primary"
+      (click)="onSubmit()"
+      [disabled]="cargando">
+
+      <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+
+      <span *ngIf="!cargando">Iniciar sesión</span>
+    </ion-button>
+   </div>
+
+    <p class="text-center text-sm">
+      ¿No tienes cuenta?
+      <a routerLink="/register" class="font-semibold text-medical-600 underline">
+        Regístrate
+      </a>
+    </p>
+
+  </div>
+</ion-content>
