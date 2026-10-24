@@ -1,8 +1,8 @@
 <ion-content class="ion-padding auth-content">
-  <div class="mx-auto mt-8 w-full max-w-md space-y-6">
+  <div class="mx-auto mt-8 w-full max-w-md space-y-6 p-2 pt-2.5">
 
-    <div class="space-y-2">
-      <div class="flex justify-center">
+    <div class="space-y-2 mt-8 p-6 mb-4">
+      <div class="flex justify-center mb-4 ">
         <img
           src="assets/img/play_store_512.png"
           alt="MyConsult MD"
@@ -16,7 +16,7 @@
 
     <div class="space-y-4">
       <div class="field">
-        <ion-label>Correo electrónico</ion-label>
+        <ion-label class="text-gray-600">Correo electrónico</ion-label>
         <ion-item lines="none" class="auth-input">
           <ion-input
             name="email"
@@ -24,13 +24,16 @@
             type="email"
             autocomplete="email"
             placeholder="tu@correo.com"
-            [(ngModel)]="email">
+            [(ngModel)]="email"
+            #emailRef="ngModel"
+            email
+            required>
           </ion-input>
         </ion-item>
       </div>
 
       <div class="field">
-        <ion-label>Contraseña</ion-label>
+        <ion-label class="text-gray-600">Contraseña</ion-label>
         <ion-item lines="none" class="auth-input">
           <ion-input
             name="password"
@@ -63,7 +66,8 @@
       <p class="text-sm text-status-cancelled">{{ error }}</p>
     </div>
 
-    <ion-button
+   <div class="flex justify-center w-full">
+     <ion-button
       type="button"
       class="btn-primary"
       (click)="onSubmit()"
@@ -73,6 +77,7 @@
 
       <span *ngIf="!cargando">Iniciar sesión</span>
     </ion-button>
+   </div>
 
     <p class="text-center text-sm">
       ¿No tienes cuenta?

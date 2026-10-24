@@ -38,6 +38,7 @@ import { EnviarRecordatorioPage } from './features/recordatorios/enviar-recordat
 
 // Notificaciones
 import { NotificacionesPage } from './features/notificaciones/notificaciones.page';
+import { AgendaPage } from './features/agenda/agenda.page';
 
 export const routes: Routes = [
   // Redirección inicial
@@ -63,7 +64,7 @@ export const routes: Routes = [
   {
     path: 'setup',
     component: SetupPage,
-    canActivate: [authGuard],
+    canActivate: [authGuard], 
   },
 
   // Navegación principal: requiere sesión y configuración completada
@@ -83,7 +84,7 @@ export const routes: Routes = [
       },
       {
         path: 'agenda',
-        component: (NuevaCitaPage as any) && undefined,
+        component: AgendaPage,
       },
       {
         path: 'lista-pacientes',

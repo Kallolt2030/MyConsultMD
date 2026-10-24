@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonSpinner, IonTitle, IonToolbar } from '@ionic/angular';
+import { IonButton, IonCheckbox, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonSpinner, IonTitle, IonToolbar } from '@ionic/angular';
 import { AuthService } from '../services/auth';
 import { Router, RouterLink } from '@angular/router';
 import { PrivacyNoticeComponent } from '../../../shared/components/privacy-notice/privacy-notice.component';
@@ -11,9 +11,9 @@ import { PrivacyNoticeComponent } from '../../../shared/components/privacy-notic
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   imports: [CommonModule, FormsModule, RouterLink,
-    IonContent, IonHeader, IonToolbar, IonTitle, IonButton,
+    IonContent, IonButton,
     IonInput, IonItem, IonSpinner,
-    PrivacyNoticeComponent, IonLabel, IonIcon],
+    PrivacyNoticeComponent, IonLabel, IonIcon,IonCheckbox],
 })
 export class RegisterPage {
   email = '';
@@ -23,6 +23,8 @@ export class RegisterPage {
   cargando = false;
   error = '';
   mostrarPrivacidad = false;
+  avisoConsultado = false;
+
 
 mostrarPassword = false;
 mostrarConfirmPassword = false;
@@ -54,6 +56,8 @@ aceptarAvisoPrivacidad(): void {
       return;
     }
 
+    
+
     try {
       this.cargando = true;
       await this.auth.register(this.email, this.password);
@@ -64,4 +68,22 @@ aceptarAvisoPrivacidad(): void {
       this.cargando = false;
     }
   }
+
+  abrirAvisoPrivacidad(): void {
+  this.mostrarPrivacidad = true;
+  this.avisoConsultado = true;
+}
+
+cerrarAvisoPrivacidad(): void {
+  this.mostrarPrivacidad = false;
+
+  // Al cerrar el aviso, se habilita la aceptación.
+  if (this.avisoConsultado) {
+    this.aceptaPrivacidad = true;
+  }
+}
+
+cambioAceptacionPrivacidad(event: CustomEvent): void {
+  this.aceptaPrivacidad = event.detail.checked;
+}
 }

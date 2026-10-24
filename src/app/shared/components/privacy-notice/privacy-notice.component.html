@@ -1,3 +1,4 @@
+
 <ion-modal
   [isOpen]="isOpen"
   (didDismiss)="cerrar.emit()">
@@ -5,13 +6,22 @@
   <ng-template>
     <ion-header>
       <ion-toolbar class="auth-toolbar">
-        <ion-title>Aviso de privacidad</ion-title>
+        <ion-title class="ml-1.5">
+          Aviso de privacidad
+        </ion-title>
 
         <ion-buttons slot="end">
           <ion-button
+            type="button"
             aria-label="Cerrar aviso"
-            (click)="cerrar.emit()">
-            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+            (click)="cerrar.emit()"
+            class="close-button">
+
+            <ion-icon
+              slot="icon-only"
+              name="close-outline">
+            </ion-icon>
+
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -22,22 +32,17 @@
 
         <!-- Encabezado -->
         <div class="pt-2 text-center">
-          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-medical-100">
-            <ion-icon
-              name="shield-checkmark-outline"
-              class="text-4xl text-medical-600">
-            </ion-icon>
-          </div>
 
           <h1 class="mt-4">Protege la información de tu consultorio</h1>
 
-          <p class="mt-2 text-sm">
-            Antes de crear tu cuenta, es importante que conozcas cómo se
-            almacenará tu información y cuáles son sus limitaciones.
+          <p class="mt-2 text-sm text-text-secondary">
+            Antes de utilizar MyConsult MD, es importante que conozcas
+            cómo se almacena tu información, qué datos se pueden registrar,
+            para qué se utilizan y cuáles son tus derechos.
           </p>
         </div>
 
-        <!-- Advertencia principal -->
+        <!-- 1. Advertencia sobre los respaldos -->
         <div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <div class="flex items-start gap-3">
             <ion-icon
@@ -47,24 +52,57 @@
 
             <div class="space-y-2">
               <h2 class="text-base font-semibold text-amber-800">
-                Información almacenada localmente
+                1. Importante: no hay respaldos automáticos
               </h2>
 
               <p class="text-sm text-amber-800">
-                MyConsult MD almacena los datos en el dispositivo mediante
-                una base de datos local. Actualmente, la aplicación no cuenta
-                con respaldo automático en la nube.
+                MyConsult MD almacena la información en una base de datos
+                local dentro del dispositivo. Actualmente, la aplicación
+                no cuenta con respaldo automático en la nube ni con
+                sincronización automática entre dispositivos.
+              </p>
+
+              <p class="text-sm text-amber-800">
+                Si desinstalas la aplicación, borras sus datos desde
+                la configuración del dispositivo o restableces el celular
+                de fábrica, puedes perder la información almacenada
+                localmente, incluidos los pacientes, las citas y la
+                configuración del consultorio.
+              </p>
+
+              <p class="text-sm font-semibold text-amber-800">
+                Si los datos se eliminan y no existe una copia de seguridad,
+                no podrás recuperarlos mediante la aplicación.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Qué puede provocar la pérdida de datos -->
+        <!-- 2. Almacenamiento local -->
         <div class="card space-y-3">
-          <h2 class="text-lg">¿Cuándo podrías perder tus datos?</h2>
+          <h2 class="text-lg">2. Almacenamiento y conservación de los datos</h2>
 
-          <p class="text-sm">
-            La información podría perderse si ocurre alguna de estas situaciones:
+          <p class="text-sm text-text-secondary">
+            La información de MyConsult MD se guarda localmente en el
+            dispositivo donde se utiliza la aplicación. Los datos no se
+            sincronizan automáticamente con otros celulares ni se guardan
+            automáticamente en un servidor.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            Actualmente, la aplicación no dispone de una función integrada
+            de respaldo y recuperación automática. El usuario debe tomar
+            precauciones para evitar la pérdida de su información.
+          </p>
+        </div>
+
+        <!-- 3. Situaciones que provocan pérdida de datos -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">3. ¿Cuándo podrías perder tus datos?</h2>
+
+          <p class="text-sm text-text-secondary">
+            La información almacenada podría perderse en las siguientes
+            situaciones:
           </p>
 
           <ul class="space-y-3 text-sm text-text-secondary">
@@ -73,7 +111,22 @@
                 name="trash-outline"
                 class="mt-0.5 shrink-0 text-xl text-medical-500">
               </ion-icon>
-              <span>Desinstalas la aplicación o borras sus datos.</span>
+              <span>
+                <strong>Desinstalar la aplicación:</strong>
+                puede eliminar la base de datos local y la información
+                guardada en ella.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="settings-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Borrar los datos de la aplicación:</strong>
+                puede eliminar pacientes, citas y configuraciones.
+              </span>
             </li>
 
             <li class="flex items-start gap-3">
@@ -81,7 +134,11 @@
                 name="phone-portrait-outline"
                 class="mt-0.5 shrink-0 text-xl text-medical-500">
               </ion-icon>
-              <span>Cambias de celular sin transferir o respaldar la información.</span>
+              <span>
+                <strong>Cambiar de dispositivo:</strong>
+                instalar la aplicación en otro celular no garantiza
+                que se transfiera la información anterior.
+              </span>
             </li>
 
             <li class="flex items-start gap-3">
@@ -89,12 +146,15 @@
                 name="refresh-outline"
                 class="mt-0.5 shrink-0 text-xl text-medical-500">
               </ion-icon>
-              <span>Restableces el dispositivo a sus valores de fábrica.</span>
+              <span>
+                <strong>Restablecer el dispositivo:</strong>
+                puede borrar los datos almacenados en el celular.
+              </span>
             </li>
           </ul>
         </div>
 
-        <!-- Consecuencia -->
+        <!-- 4. Recuperación de datos -->
         <div class="rounded-xl border border-status-cancelled-bg bg-status-cancelled-bg p-4">
           <div class="flex items-start gap-3">
             <ion-icon
@@ -104,7 +164,7 @@
 
             <div class="space-y-2">
               <h2 class="text-base font-semibold text-status-cancelled">
-                No hay recuperación automática
+                4. No hay recuperación automática
               </h2>
 
               <p class="text-sm text-status-cancelled">
@@ -112,48 +172,318 @@
                 de seguridad, podrías perder las citas, los pacientes y la
                 configuración guardada.
               </p>
+
+              <p class="text-sm text-status-cancelled">
+                Reinstalar la aplicación no garantiza que la información
+                anterior pueda recuperarse. La posibilidad de conservar
+                o restaurar datos depende también del sistema operativo
+                y de la configuración de copias de seguridad del dispositivo.
+              </p>
             </div>
           </div>
         </div>
 
-        <!-- Recomendación -->
-        <div class="rounded-xl border border-medical-200 bg-medical-50 p-4">
-          <div class="flex items-start gap-3">
-            <ion-icon
-              name="information-circle-outline"
-              class="shrink-0 text-2xl text-medical-600">
-            </ion-icon>
+        <!-- 5. Responsable de los datos -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">5. Responsable de los datos personales</h2>
 
-            <p class="text-sm text-medical-800">
-              Te recomendamos mantener respaldos periódicos de tu información
-              y proteger el acceso al dispositivo.
+          <p class="text-sm text-text-secondary">
+            La persona o entidad responsable del consultorio que utiliza
+            MyConsult MD debe identificar quién decide sobre el tratamiento
+            de los datos personales de sus pacientes y atender las
+            obligaciones de privacidad que le correspondan.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            El responsable del consultorio deberá proporcionar sus datos
+            de identificación y un medio de contacto para atender las
+            solicitudes relacionadas con la privacidad y la protección
+            de los datos personales.
+          </p>
+        </div>
+
+        <!-- 6. Datos recopilados -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">6. ¿Qué información se puede registrar?</h2>
+
+          <p class="text-sm text-text-secondary">
+            MyConsult MD está diseñada para gestionar la información
+            necesaria para organizar las actividades de un consultorio.
+            Según las funciones utilizadas, se pueden registrar los
+            siguientes datos:
+          </p>
+
+          <ul class="space-y-3 text-sm text-text-secondary">
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="person-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Datos de la cuenta:</strong>
+                correo electrónico y credenciales de acceso.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="business-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Datos del consultorio:</strong>
+                nombre, tipo de establecimiento y horarios de trabajo.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="people-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Datos de los pacientes:</strong>
+                nombre, teléfono e identificador o usuario de Telegram,
+                cuando corresponda.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="calendar-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Datos de las citas:</strong>
+                fecha, hora, tipo de cita, procedimiento, notas y estado
+                de la cita.
+              </span>
+            </li>
+          </ul>
+
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-3">
+            <p class="text-sm text-amber-800">
+              Las notas y los procedimientos pueden contener información
+              relacionada con la salud, considerada sensible. Se recomienda
+              registrar únicamente los datos necesarios y evitar incluir
+              información que no sea indispensable.
             </p>
           </div>
         </div>
 
-        <!-- Aceptación explícita -->
-        <div class="space-y-3 pt-2">
+        <!-- 7. Finalidades -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">7. ¿Para qué se utilizan los datos?</h2>
+
+          <p class="text-sm text-text-secondary">
+            Los datos personales se utilizan para las siguientes finalidades:
+          </p>
+
+          <ul class="space-y-2 text-sm text-text-secondary">
+            <li>• Crear y administrar la cuenta del usuario.</li>
+            <li>• Configurar los datos y horarios del consultorio.</li>
+            <li>• Registrar y consultar la información de los pacientes.</li>
+            <li>• Programar, consultar, modificar y cancelar citas.</li>
+            <li>• Mantener el historial y el estado de las citas.</li>
+            <li>• Facilitar la preparación de recordatorios para los pacientes.</li>
+            <li>• Organizar las citas pendientes y realizadas.</li>
+          </ul>
+
+          <p class="text-sm text-text-secondary">
+            Los datos no deben utilizarse para finalidades distintas de
+            las informadas sin cumplir los requisitos legales aplicables.
+          </p>
+        </div>
+
+        <!-- 8. Recordatorios y servicios externos -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">8. Recordatorios y servicios externos</h2>
+
+          <p class="text-sm text-text-secondary">
+            MyConsult MD permite preparar mensajes de recordatorio
+            relacionados con las citas. Si el usuario decide compartir
+            información mediante WhatsApp, Telegram u otro servicio externo,
+            el envío y el tratamiento posterior de los datos estarán
+            sujetos al funcionamiento y a las políticas de privacidad
+            del servicio utilizado.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            La aplicación no debe considerarse un servicio de envío
+            automático de mensajes ni de almacenamiento en la nube
+            mientras esas funciones no estén implementadas.
+          </p>
+        </div>
+
+        <!-- 9. Consentimiento -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">9. Consentimiento para el tratamiento</h2>
+
+          <p class="text-sm text-text-secondary">
+            El tratamiento de los datos personales debe contar con el
+            consentimiento del titular cuando así lo exija la legislación
+            aplicable. En los casos previstos por la ley, se deberá obtener
+            consentimiento expreso, especialmente para los datos personales
+            sensibles.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            Antes de registrar información de pacientes, el responsable
+            del consultorio deberá asegurarse de contar con la autorización
+            correspondiente cuando sea necesaria y de informar las
+            finalidades del tratamiento.
+          </p>
+        </div>
+
+        <!-- 10. Derechos ARCO -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">10. Derechos de los titulares (ARCO)</h2>
+
+          <p class="text-sm text-text-secondary">
+            De acuerdo con la normativa aplicable en materia de protección
+            de datos personales, los titulares pueden ejercer los siguientes
+            derechos:
+          </p>
+
+          <ul class="space-y-3 text-sm text-text-secondary">
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="eye-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Acceso:</strong>
+                conocer qué datos personales se tienen y cómo se utilizan.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="create-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Rectificación:</strong>
+                solicitar la corrección de datos incorrectos o incompletos.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="trash-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Cancelación:</strong>
+                solicitar la eliminación de los datos cuando proceda
+                conforme a la legislación aplicable.
+              </span>
+            </li>
+
+            <li class="flex items-start gap-3">
+              <ion-icon
+                name="hand-left-outline"
+                class="mt-0.5 shrink-0 text-xl text-medical-500">
+              </ion-icon>
+              <span>
+                <strong>Oposición:</strong>
+                oponerse al tratamiento de los datos en los casos previstos
+                por la legislación.
+              </span>
+            </li>
+          </ul>
+
+          <p class="text-sm text-text-secondary">
+            Las solicitudes deberán dirigirse a la persona responsable
+            del consultorio mediante el medio de contacto que esta
+            proporcione. Su atención estará sujeta a los requisitos
+            y excepciones legales correspondientes.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            También podrá solicitarse la revocación del consentimiento
+            o la limitación del uso o divulgación de los datos cuando
+            resulte aplicable.
+          </p>
+        </div>
+
+        <!-- 11. Seguridad -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">11. Seguridad y confidencialidad</h2>
+
+          <p class="text-sm text-text-secondary">
+            La información personal debe tratarse de forma confidencial
+            y protegerse contra el acceso, uso, modificación, pérdida
+            o divulgación no autorizados.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            Se recomienda utilizar un dispositivo protegido con bloqueo
+            de pantalla, evitar compartir las credenciales de acceso y
+            mantener el dispositivo y la aplicación actualizados.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            Aunque se adopten medidas de protección, no se puede garantizar
+            que un dispositivo esté completamente libre de riesgos.
+            El responsable deberá actuar conforme a las obligaciones
+            legales aplicables si ocurre una vulneración de seguridad.
+          </p>
+        </div>
+
+        <!-- 12. Transferencia de datos -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">12. Transferencia de datos personales</h2>
+
+          <p class="text-sm text-text-secondary">
+            Actualmente, la aplicación utiliza una base de datos local
+            y no cuenta con sincronización automática en la nube.
+            Por ello, no debe asumirse que los datos se transfieren
+            automáticamente a un servidor.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            Si se implementan servicios externos, transferencias o
+            almacenamiento remoto en el futuro, deberán informarse
+            las condiciones correspondientes y obtenerse el consentimiento
+            cuando sea legalmente necesario.
+          </p>
+        </div>
+
+        <!-- 13. Cambios al aviso -->
+        <div class="card space-y-3">
+          <h2 class="text-lg">13. Cambios al aviso de privacidad</h2>
+
+          <p class="text-sm text-text-secondary">
+            Este aviso podrá actualizarse cuando cambien las funciones
+            de MyConsult MD, las finalidades del tratamiento o las
+            condiciones de protección de los datos personales.
+          </p>
+
+          <p class="text-sm text-text-secondary">
+            Las modificaciones deberán ponerse a disposición de los
+            usuarios por un medio apropiado. Cuando corresponda,
+            se solicitará nuevamente el consentimiento conforme
+            a la legislación aplicable.
+          </p>
+        </div>
+
+        <!-- Cierre -->
+        <div class="space-y-3 pt-2 pb-4">
           <p class="text-center text-sm text-text-secondary">
-            Confirma que has leído y comprendido esta advertencia para
-            continuar con el registro.
+            Al cerrar este aviso volverás a la pantalla de registro.
+            Cerrar la ventana no sustituye las obligaciones legales
+            del responsable del tratamiento de los datos personales.
           </p>
 
           <ion-button
             expand="block"
-            (click)="aceptar.emit()">
+            (click)="cerrar.emit()">
             <ion-icon
-              name="checkmark-circle-outline"
+              name="close-circle-outline"
               slot="start">
             </ion-icon>
-            He leído y acepto
-          </ion-button>
-
-          <ion-button
-            expand="block"
-            fill="outline"
-            color="medium"
-            (click)="cerrar.emit()">
-            Leer después
+            Cerrar aviso
           </ion-button>
         </div>
 

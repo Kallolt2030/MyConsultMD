@@ -1,13 +1,169 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>setup</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="setup-content">
+  <div class="ion-padding">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">setup</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <div class="setup-intro">
+      <div class="setup-icon">
+        <ion-icon name="medkit-outline"></ion-icon>
+      </div>
+
+      <h1>Configuremos tu consultorio</h1>
+
+      <p>
+        Completa los siguientes datos para personalizar
+        la administración de tus citas.
+      </p>
+    </div>
+
+    <form (ngSubmit)="guardarConfiguracion()">
+
+      <section class="form-section">
+        <h2>Información general</h2>
+
+        <ion-item>
+          <ion-label position="stacked">
+            Nombre del consultorio *
+          </ion-label>
+          <ion-input
+            name="nombre"
+            [(ngModel)]="consultorio.nombre"
+            placeholder="Ej. Consultorio Dental San José"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">
+            Nombre del profesional *
+          </ion-label>
+          <ion-input
+            name="profesional"
+            [(ngModel)]="consultorio.profesional"
+            placeholder="Ej. Dra. María López"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">
+            Tipo de establecimiento *
+          </ion-label>
+
+          <ion-select
+            name="tipo_establecimiento"
+            [(ngModel)]="consultorio.tipo_establecimiento"
+            placeholder="Selecciona una opción"
+            interface="popover"
+            required>
+
+            <ion-select-option value="Consultorio médico">
+              Consultorio médico
+            </ion-select-option>
+
+            <ion-select-option value="Consultorio dental">
+              Consultorio dental
+            </ion-select-option>
+
+            <ion-select-option value="Clínica">
+              Clínica
+            </ion-select-option>
+
+            <ion-select-option value="Psicología">
+              Consultorio de psicología
+            </ion-select-option>
+
+            <ion-select-option value="Otro">
+              Otro
+            </ion-select-option>
+
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">
+            Especialidad
+          </ion-label>
+
+          <ion-input
+            name="especialidad"
+            [(ngModel)]="consultorio.especialidad"
+            placeholder="Ej. Odontología">
+          </ion-input>
+        </ion-item>
+      </section>
+
+      <section class="form-section">
+        <h2>Horario de atención</h2>
+
+        <div class="time-grid">
+          <ion-item>
+            <ion-label position="stacked">
+              Hora de apertura
+            </ion-label>
+
+            <ion-input
+              name="hora_inicio"
+              type="time"
+              [(ngModel)]="consultorio.hora_inicio"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">
+              Hora de cierre
+            </ion-label>
+
+            <ion-input
+              name="hora_cierre"
+              type="time"
+              [(ngModel)]="consultorio.hora_cierre"
+              required>
+            </ion-input>
+          </ion-item>
+        </div>
+
+        <ion-text color="medium">
+          <p class="helper-text">
+            Selecciona los días en los que atiendes pacientes.
+          </p>
+        </ion-text>
+
+        <div class="days-grid">
+          <ion-item
+            *ngFor="let dia of diasSemana"
+            lines="none">
+
+            <ion-checkbox
+              slot="start"
+              [checked]="consultorio.dias_laborales.includes(dia)"
+              (ionChange)="cambiarDia(dia, $event.detail.checked)">
+            </ion-checkbox>
+
+            <ion-label>{{ dia }}</ion-label>
+          </ion-item>
+        </div>
+      </section>
+
+      <ion-text color="danger" *ngIf="error">
+        <p class="error-message">{{ error }}</p>
+      </ion-text>
+
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="cargando"
+        class="save-button">
+
+        <ion-spinner
+          *ngIf="cargando"
+          name="crescent">
+        </ion-spinner>
+
+        <span *ngIf="!cargando">Guardar configuración</span>
+      </ion-button>
+
+      <p class="required-note pb-6">* Campos obligatorios</p>
+
+    </form>
+  </div>
 </ion-content>

@@ -11,7 +11,7 @@ import { AuthService } from '../services/auth';
   standalone: true,
   imports: [
     CommonModule, FormsModule, RouterLink,
-    IonContent, IonHeader, IonToolbar, IonTitle,
+    IonContent,
     IonButton, IonInput, IonItem, IonSpinner, IonIcon, IonLabel
   ]
 })
