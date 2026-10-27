@@ -79,7 +79,7 @@ export class InicioPage implements OnInit {
   }
 
   irPacientes(): void {
-    window.location.href = '/tabs/lista-pacientes';
+    window.location.href = '/tabs/pacientes';
   }
 
   verHistorial(): void {

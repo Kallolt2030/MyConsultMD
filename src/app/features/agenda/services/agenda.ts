@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 
 import { DatabaseService } from '../../../core/services/database';
 import { CitaDetalle } from '../../../core/models/cita';
-import { Paciente } from '../../pacientes/services/pacientes';
+import { Paciente } from '../../../core/models/paciente';
+
 
 @Injectable({
   providedIn: 'root'

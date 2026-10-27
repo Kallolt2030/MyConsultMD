@@ -1,13 +1,172 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>registrar-paciente</ion-title>
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-pacientes">
+    <ion-buttons slot="start">
+      <ion-button
+        type="button"
+        fill="clear"
+        (click)="cancelarFormulario()"
+        aria-label="Regresar">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>
+      {{ paciente?.id ? 'Editar paciente' : 'Registrar paciente' }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">registrar-paciente</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding contenido-pacientes">
+  <div class="mx-auto max-w-xl space-y-6">
+
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="mb-6 flex items-center gap-4">
+        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100">
+          <ion-icon
+            name="person-outline"
+            class="text-3xl text-blue-800">
+          </ion-icon>
+        </div>
+
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">
+            {{ paciente?.id ? 'Actualizar información' : 'Nuevo paciente' }}
+          </h1>
+          <p class="text-sm text-slate-500">
+            Registra los datos de contacto del paciente.
+          </p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="guardarPaciente()" class="space-y-5">
+
+        <div>
+          <ion-label class="mb-2 block font-semibold text-slate-700">
+            Nombre completo <span class="text-red-500">*</span>
+          </ion-label>
+
+          <ion-item lines="none" class="campo-paciente">
+            <ion-icon
+              name="person-outline"
+              slot="start"
+              class="text-blue-700">
+            </ion-icon>
+
+            <ion-input
+              name="nombre"
+              [(ngModel)]="pacienteForm.nombre"
+              placeholder="Nombre y apellidos"
+              autocomplete="name"
+              maxlength="100"
+              required>
+            </ion-input>
+          </ion-item>
+        </div>
+
+        <div>
+          <ion-label class="mb-2 block font-semibold text-slate-700">
+            Teléfono <span class="text-red-500">*</span>
+          </ion-label>
+
+          <ion-item lines="none" class="campo-paciente">
+            <ion-icon
+              name="call-outline"
+              slot="start"
+              class="text-blue-700">
+            </ion-icon>
+
+            <ion-input
+              name="telefono"
+              [(ngModel)]="pacienteForm.telefono"
+              type="tel"
+              inputmode="tel"
+              placeholder="Ej. 4491234567"
+              autocomplete="tel"
+              maxlength="20"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <p class="mt-1 text-xs text-slate-500">
+            Se utilizará como dato de contacto.
+          </p>
+        </div>
+
+        <div>
+          <ion-label class="mb-2 block font-semibold text-slate-700">
+            Usuario de Telegram
+          </ion-label>
+
+          <ion-item lines="none" class="campo-paciente">
+            <ion-icon
+              name="chatbubble-outline"
+              slot="start"
+              class="text-blue-700">
+            </ion-icon>
+
+            <ion-input
+              name="telegram"
+              [(ngModel)]="pacienteForm.telegram"
+              placeholder="@usuario"
+              autocomplete="off"
+              maxlength="100">
+            </ion-input>
+          </ion-item>
+
+          <p class="mt-1 text-xs text-slate-500">
+            Campo opcional. Puedes dejarlo vacío.
+          </p>
+        </div>
+
+        <div
+          *ngIf="error"
+          class="rounded-xl border border-red-200 bg-red-50 p-3">
+          <ion-text color="danger">
+            <p class="text-sm">{{ error }}</p>
+          </ion-text>
+        </div>
+
+        <div class="flex flex-col gap-3 pt-3 sm:flex-row">
+          <ion-button
+            type="button"
+            fill="outline"
+            color="medium"
+            expand="block"
+            class="flex-1"
+            [disabled]="guardando"
+            (click)="cancelarFormulario()">
+            Cancelar
+          </ion-button>
+
+          <ion-button
+            type="submit"
+            expand="block"
+            class="boton-guardar flex-1"
+            [disabled]="guardando">
+            <ion-spinner
+              *ngIf="guardando"
+              name="crescent"
+              slot="start">
+            </ion-spinner>
+
+            <ion-icon
+              *ngIf="!guardando"
+              name="save-outline"
+              slot="start">
+            </ion-icon>
+
+            {{ guardando ? 'Guardando...' :
+              (paciente?.id ? 'Actualizar paciente' : 'Guardar paciente') }}
+          </ion-button>
+        </div>
+
+      </form>
+    </section>
+
+    <p class="text-center text-xs text-slate-400">
+      Los campos marcados con * son obligatorios.
+    </p>
+
+  </div>
 </ion-content>

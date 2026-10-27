@@ -24,8 +24,8 @@ import { DetalleCitaPage } from './features/citas/detalle-cita/detalle-cita.page
 import { EditarCitaPage } from './features/citas/editar-cita/editar-cita.page';
 
 // Pacientes
-import { RegistrarPacientePage } from './features/pacientes/registrar-paciente/registrar-paciente.page';
-import { ListaPacientesPage } from './features/pacientes/lista-pacientes/lista-pacientes.page';
+
+
 import { DetallePacientePage } from './features/pacientes/detalle-paciente/detalle-paciente.page';
 
 // Historial y configuración
@@ -39,6 +39,8 @@ import { EnviarRecordatorioPage } from './features/recordatorios/enviar-recordat
 // Notificaciones
 import { NotificacionesPage } from './features/notificaciones/notificaciones.page';
 import { AgendaPage } from './features/agenda/agenda.page';
+import { PacienteComponent } from './features/pacientes/paciente/paciente.component';
+import { RegistrarPacienteComponent } from './features/pacientes/registrar-paciente/registrar-paciente.page';
 
 export const routes: Routes = [
   // Redirección inicial
@@ -87,8 +89,8 @@ export const routes: Routes = [
         component: AgendaPage,
       },
       {
-        path: 'lista-pacientes',
-        component: ListaPacientesPage,
+        path: 'pacientes',
+        component: PacienteComponent,
       },
       {
         path: 'historial',
@@ -121,7 +123,7 @@ export const routes: Routes = [
   // Gestión de pacientes: requiere autenticación
   {
     path: 'registrar-paciente',
-    component: RegistrarPacientePage,
+    component: RegistrarPacienteComponent,
     canActivate: [authGuard, setupGuard],
   },
   {

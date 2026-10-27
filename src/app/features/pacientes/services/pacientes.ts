@@ -1,66 +1,91 @@
-
 import { Injectable } from '@angular/core';
-
 import { DatabaseService } from '../../../core/services/database';
 
-export interface Paciente {
-  id: number;
+export interface PacienteRegistro {
+  id?: number;
   nombre: string;
   telefono: string;
   telegram: string;
+  fecha_registro?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class Pacientes {
+export class PacientesService {
 
   constructor(
     private databaseService: DatabaseService
   ) {}
 
   // Obtener todos los pacientes
-  async obtenerPacientes(): Promise<Paciente[]> {
-    return this.databaseService.query<Paciente>(
-      `SELECT id, nombre, telefono, telegram
+  async cargarPacientes(): Promise<PacienteRegistro[]> {
+    return this.databaseService.query<PacienteRegistro>(
+      `SELECT id, nombre, telefono, telegram, fecha_registro
        FROM pacientes
        ORDER BY nombre ASC`
     );
   }
 
-  // Crear un paciente
-  async crearPaciente(
-    p: Omit<Paciente, 'id'>
-  ): Promise<number> {
-    const res = await this.databaseService.run(
-      `INSERT INTO pacientes (
-         nombre,
-         telefono,
-         telegram
-       )
-       VALUES (?, ?, ?)`,
-      [
-        p.nombre,
-        p.telefono ?? '',
-        p.telegram ?? ''
-      ]
-    );
+  // Buscar pacientes por nombre o teléfono
+  async buscarPacientes(
+    texto: string
+  ): Promise<PacienteRegistro[]> {
+    const busqueda = `%${texto.trim()}%`;
 
-    return res.changes?.lastId ?? 0;
+    return this.databaseService.query<PacienteRegistro>(
+      `SELECT id, nombre, telefono, telegram, fecha_registro
+       FROM pacientes
+       WHERE nombre LIKE ?
+          OR telefono LIKE ?
+       ORDER BY nombre ASC`,
+      [busqueda, busqueda]
+    );
   }
 
-  // Buscar un paciente por ID
-  async obtenerPacientePorId(
-    id: number
-  ): Promise<Paciente | null> {
-    const pacientes = await this.databaseService.query<Paciente>(
-      `SELECT id, nombre, telefono, telegram
-       FROM pacientes
-       WHERE id = ?
-       LIMIT 1`,
+  // Registrar un paciente
+  async registrarPaciente(
+    paciente: PacienteRegistro
+  ): Promise<void> {
+    await this.databaseService.run(
+      `INSERT INTO pacientes (
+        nombre,
+        telefono,
+        telegram
+      ) VALUES (?, ?, ?)`,
+      [
+        paciente.nombre.trim(),
+        paciente.telefono.trim(),
+        paciente.telegram.trim()
+      ]
+    );
+  }
+
+  // Actualizar los datos de un paciente
+  async actualizarPaciente(
+    id: number,
+    paciente: PacienteRegistro
+  ): Promise<void> {
+    await this.databaseService.run(
+      `UPDATE pacientes
+       SET nombre = ?,
+           telefono = ?,
+           telegram = ?
+       WHERE id = ?`,
+      [
+        paciente.nombre.trim(),
+        paciente.telefono.trim(),
+        paciente.telegram.trim(),
+        id
+      ]
+    );
+  }
+
+  // Eliminar un paciente
+  async eliminarPaciente(id: number): Promise<void> {
+    await this.databaseService.run(
+      `DELETE FROM pacientes WHERE id = ?`,
       [id]
     );
-
-    return pacientes.length > 0 ? pacientes[0] : null;
   }
 }

@@ -1,13 +1,166 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>detalle-paciente</ion-title>
-  </ion-toolbar>
-</ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">detalle-paciente</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="contenido-detalle">
+  <div class="mx-auto max-w-3xl space-y-5 p-4 sm:p-6">
+
+    <!-- Regresar -->
+    <ion-button
+      fill="clear"
+      class="boton-regresar"
+      (click)="regresarALista()">
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+      Volver a pacientes
+    </ion-button>
+
+    <!-- Paciente encontrado -->
+    <ng-container *ngIf="paciente; else pacienteNoDisponible">
+
+      <!-- Encabezado del perfil -->
+      <section class="rounded-2xl bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+
+          <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-blue-100">
+            <ion-icon
+              name="person-outline"
+              class="text-5xl text-blue-800">
+            </ion-icon>
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-blue-700">
+              Perfil del paciente
+            </p>
+
+            <h1 class="mt-1 break-words text-2xl font-bold text-slate-800">
+              {{ paciente.nombre }}
+            </h1>
+
+            <p class="mt-2 text-sm text-slate-500">
+              Identificador: #{{ paciente.id }}
+            </p>
+
+            <ion-badge color="primary" class="mt-3">
+              Paciente registrado
+            </ion-badge>
+          </div>
+
+          <ion-button
+            class="boton-editar"
+            (click)="editarPaciente()">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Editar
+          </ion-button>
+
+        </div>
+      </section>
+
+      <!-- Información de contacto -->
+      <section class="space-y-3">
+        <h2 class="px-1 text-lg font-bold text-slate-800">
+          Información de contacto
+        </h2>
+
+        <!-- Teléfono -->
+        <ion-card class="tarjeta-detalle">
+          <ion-card-content>
+            <div class="flex items-start gap-4">
+              <div class="icono-detalle">
+                <ion-icon name="call-outline"></ion-icon>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-slate-500">Teléfono</p>
+
+                <p class="mt-1 break-words font-semibold text-slate-800">
+                  {{ paciente.telefono || 'No registrado' }}
+                </p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Telegram -->
+        <ion-card class="tarjeta-detalle">
+          <ion-card-content>
+            <div class="flex items-start gap-4">
+              <div class="icono-detalle">
+                <ion-icon name="chatbubble-outline"></ion-icon>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-slate-500">
+                  Usuario de Telegram
+                </p>
+
+                <p class="mt-1 break-words font-semibold text-slate-800">
+                  {{ paciente.telegram || 'No registrado' }}
+                </p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Fecha de registro -->
+        <ion-card class="tarjeta-detalle">
+          <ion-card-content>
+            <div class="flex items-start gap-4">
+              <div class="icono-detalle">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-slate-500">
+                  Fecha de registro
+                </p>
+
+                <p class="mt-1 font-semibold text-slate-800">
+                  {{ paciente.fecha_registro
+                    ? (paciente.fecha_registro | date:'dd/MM/yyyy')
+                    : 'Sin fecha registrada' }}
+                </p>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </section>
+
+      <!-- Aviso -->
+      <div class="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
+        <ion-icon
+          name="information-circle-outline"
+          class="mt-0.5 text-xl text-blue-700">
+        </ion-icon>
+
+        <p class="text-sm leading-6 text-blue-900">
+          La información mostrada corresponde a los datos de contacto
+          registrados para este paciente.
+        </p>
+      </div>
+
+    </ng-container>
+
+    <!-- Paciente no disponible -->
+    <ng-template #pacienteNoDisponible>
+      <section class="rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
+        <ion-icon
+          name="information-circle-outline"
+          class="text-5xl text-slate-400">
+        </ion-icon>
+
+        <h2 class="mt-4 text-lg font-bold text-slate-800">
+          Paciente no disponible
+        </h2>
+
+        <p class="mt-2 text-sm text-slate-500">
+          No se recibió la información del paciente seleccionado.
+        </p>
+
+        <ion-button
+          class="boton-editar mt-5"
+          (click)="regresarALista()">
+          Regresar a la lista
+        </ion-button>
+      </section>
+    </ng-template>
+
+  </div>
 </ion-content>

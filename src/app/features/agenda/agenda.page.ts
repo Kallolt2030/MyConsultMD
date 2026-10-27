@@ -19,8 +19,8 @@ import {
 } from '@ionic/angular';
 
 import { CitaDetalle } from '../../core/models/cita';
-import { Paciente } from '../pacientes/services/pacientes';
 import { Agenda } from './services/agenda';
+import { Paciente } from '../../core/models/paciente';
 
 @Component({
   selector: 'app-agenda',

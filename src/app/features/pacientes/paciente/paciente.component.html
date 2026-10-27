@@ -1,0 +1,24 @@
+
+<!-- Lista de pacientes -->
+<app-lista-pacientes
+  *ngIf="vista === 'lista'"
+  (registrar)="abrirRegistro()"
+  (verDetalle)="abrirDetalle($event)"
+  (editar)="editarPaciente($event)"
+  (eliminado)="actualizarLista()">
+</app-lista-pacientes>
+
+<!-- Registrar o editar paciente -->
+<app-registrar-paciente
+  *ngIf="vista === 'registro'"
+  [paciente]="pacienteParaFormulario"
+  (guardar)="actualizarLista()"
+  (cancelar)="volverALista()">
+</app-registrar-paciente>
+
+<app-detalle-paciente
+  *ngIf="vista === 'detalle'"
+  [paciente]="pacienteParaDetalle"
+  (regresar)="volverALista()"
+  (editar)="editarPaciente($event)">
+</app-detalle-paciente>

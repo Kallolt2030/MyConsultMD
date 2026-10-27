@@ -1,13 +1,223 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>lista-pacientes</ion-title>
-  </ion-toolbar>
-</ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">lista-pacientes</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="contenido-pacientes">
+  <div class="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
+
+    <!-- Encabezado -->
+    <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800">
+          Pacientes
+        </h1>
+
+        <p class="mt-1 text-sm text-slate-500">
+          Administra la información de tus pacientes.
+        </p>
+      </div>
+
+      <ion-button
+        class="boton-principal"
+        (click)="abrirRegistro()">
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
+        Registrar paciente
+      </ion-button>
+    </section>
+
+    <!-- Resumen -->
+    <section class="rounded-2xl bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+          <ion-icon
+            name="people-outline"
+            class="text-2xl text-blue-800">
+          </ion-icon>
+        </div>
+
+        <div>
+          <p class="text-sm text-slate-500">
+            Pacientes registrados
+          </p>
+
+          <p class="text-2xl font-bold text-slate-800">
+            {{ pacientes.length }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Buscador -->
+    <section class="rounded-2xl bg-white p-4 shadow-sm">
+      <ion-item lines="none" class="buscador-pacientes">
+        <ion-icon
+          name="search-outline"
+          slot="start"
+          class="text-blue-700">
+        </ion-icon>
+
+        <ion-input
+          [(ngModel)]="busqueda"
+          placeholder="Buscar por nombre, teléfono o Telegram..."
+          clearInput
+          aria-label="Buscar pacientes">
+        </ion-input>
+      </ion-item>
+    </section>
+
+    <!-- Error -->
+    <div
+      *ngIf="error"
+      class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      {{ error }}
+    </div>
+
+    <!-- Cargando -->
+    <section
+      *ngIf="cargando"
+      class="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white p-12 text-slate-500">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p class="text-sm">Cargando pacientes...</p>
+    </section>
+
+    <!-- Lista -->
+    <section
+      *ngIf="!cargando && pacientesFiltrados.length > 0"
+      class="space-y-3">
+
+      <article
+        *ngFor="let paciente of pacientesFiltrados"
+        class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+
+          <!-- Datos del paciente -->
+          <div class="flex min-w-0 flex-1 items-start gap-4">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100">
+              <ion-icon
+                name="person-outline"
+                class="text-2xl text-blue-800">
+              </ion-icon>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <h2 class="break-words text-base font-bold text-slate-800">
+                {{ paciente.nombre }}
+              </h2>
+
+              <div class="mt-2 flex items-center gap-2 text-sm text-slate-500">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>{{ paciente.telefono || 'Sin teléfono' }}</span>
+              </div>
+
+              <div class="mt-1 flex items-center gap-2 text-sm text-slate-500">
+                <ion-icon name="chatbubble-outline"></ion-icon>
+                <span>{{ paciente.telegram || 'Sin usuario de Telegram' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex flex-wrap gap-2 sm:justify-end">
+            <ion-button
+              fill="outline"
+              size="small"
+              class="boton-secundario"
+              (click)="abrirDetalle(paciente)">
+              <ion-icon name="eye-outline" slot="start"></ion-icon>
+              Detalle
+            </ion-button>
+
+            <ion-button
+              fill="outline"
+              size="small"
+              class="boton-secundario"
+              (click)="editarPaciente(paciente)">
+              <ion-icon name="create-outline" slot="start"></ion-icon>
+              Editar
+            </ion-button>
+
+            <ion-button
+              fill="clear"
+              color="danger"
+              size="small"
+              [disabled]="eliminando"
+              (click)="confirmarEliminacion(paciente)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+
+        </div>
+      </article>
+    </section>
+
+    <!-- Sin resultados -->
+    <section
+      *ngIf="!cargando && pacientesFiltrados.length === 0"
+      class="rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
+
+      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+        <ion-icon
+          name="people-outline"
+          class="text-3xl text-slate-400">
+        </ion-icon>
+      </div>
+
+      <h2 class="text-lg font-semibold text-slate-800">
+        {{ busqueda ? 'No se encontraron pacientes' : 'Aún no hay pacientes' }}
+      </h2>
+
+      <p class="mx-auto mt-2 max-w-sm text-sm text-slate-500">
+        {{
+          busqueda
+            ? 'Prueba con otro nombre, teléfono o usuario de Telegram.'
+            : 'Registra tu primer paciente para comenzar a organizar su información.'
+        }}
+      </p>
+
+      <ion-button
+        *ngIf="!busqueda"
+        class="boton-principal mt-4"
+        (click)="abrirRegistro()">
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
+        Registrar primer paciente
+      </ion-button>
+
+      <ion-button
+        *ngIf="busqueda"
+        fill="clear"
+        (click)="busqueda = ''">
+        Limpiar búsqueda
+      </ion-button>
+    </section>
+
+    <!-- Actualizar -->
+    <div class="flex justify-end">
+      <ion-button
+        fill="clear"
+        size="small"
+        [disabled]="cargando"
+        (click)="cargarPacientes()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Actualizar lista
+      </ion-button>
+    </div>
+
+  </div>
+
+  
+<ion-alert
+  [isOpen]="mostrarConfirmacion"
+  header="Eliminar paciente"
+  [message]="'¿Deseas eliminar a ' + (pacienteAEliminar?.nombre || 'este paciente') + '?'"
+  [buttons]="[
+    {
+      text: 'Cancelar',
+      role: 'cancel'
+    },
+    {
+      text: 'Eliminar',
+      role: 'destructive',
+      handler: confirmarEliminarPaciente.bind(this)
+    }
+  ]"
+  (didDismiss)="cancelarEliminacion()">
+</ion-alert>
 </ion-content>
