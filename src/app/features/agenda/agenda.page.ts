@@ -1,8 +1,15 @@
-
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  signal,
+  ChangeDetectorRef,
+  OnInit,
+  OnDestroy
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import {
   IonContent,
@@ -10,17 +17,18 @@ import {
   IonToolbar,
   IonIcon,
   IonBadge,
-  IonSelect,
-  IonSelectOption,
-  IonModal,
+  IonButton,
   ToastController,
   AlertController,
-  IonButton
+  IonSpinner,
+  IonLabel,
+  IonItem
 } from '@ionic/angular';
 
 import { CitaDetalle } from '../../core/models/cita';
 import { Agenda } from './services/agenda';
-import { Paciente } from '../../core/models/paciente';
+import { AgendaRefreshService } from '../../core/services/agenda-refresh';
+
 
 @Component({
   selector: 'app-agenda',
@@ -35,222 +43,175 @@ import { Paciente } from '../../core/models/paciente';
     IonHeader,
     IonToolbar,
     IonIcon,
+    IonSpinner,
+    IonLabel,
+    IonItem,
     IonBadge,
-    IonSelect,
-    IonSelectOption,
-    IonButton,
-    IonModal
+    IonButton
   ]
 })
-export class AgendaPage implements OnInit {
+export class AgendaPage implements OnInit, OnDestroy {
 
-  // Listado de citas
-  fechaSeleccionada = new Date().toISOString().split('T')[0];
-  citas: CitaDetalle[] = [];
-  pacientes: Paciente[] = [];
+  fechaSeleccionada = new Date().toLocaleDateString('en-CA');
 
-  cargando = false;
-  errorCargandoCitas = false;
+  citas = signal<CitaDetalle[]>([]);
+  cargando = signal(false);
+  errorCargandoCitas = signal(false);
 
-  // Formulario
-  mostrarFormulario = false;
-  citaEnEdicion: number | null = null;
-  guardando = false;
+  private cargaEnCurso = false;
+  private refrescoPendiente = false;
 
-  citaForm = {
-    paciente_id: null as number | null,
-    hora: '',
-    tipo: 'Consulta',
-    procedimiento: '',
-    notas: ''
-  };
-
-  private initialized = false;
+  private refreshSub?: Subscription;
+  private routerSub?: Subscription;
 
   constructor(
     private agenda: Agenda,
+    private router: Router,
     private toastController: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private cdr: ChangeDetectorRef,
+    private refreshService: AgendaRefreshService
   ) {}
 
-  // Inicialización
-  async ngOnInit(): Promise<void> {
-    await this.cargarPacientes();
-    await this.cargarCitas();
+  ngOnInit(): void {
+    // Capa 2: Subject (el detalle lo emite al volver)
+    this.refreshSub = this.refreshService.refresh$.subscribe(() => {
+      console.log('[AgendaPage] Refresh por Subject');
+      void this.cargarCitas();
+    });
 
-    this.initialized = true;
+    // Capa 3: Router.events — cubre TODA navegación a /tabs/agenda
+    // aunque ionViewWillEnter no dispare (caché del outlet).
+    this.routerSub = this.router.events
+      .pipe(
+        filter(e => e instanceof NavigationEnd),
+        filter((e: NavigationEnd) =>
+          e.urlAfterRedirects.includes('/tabs/agenda')
+        )
+      )
+      .subscribe(e => {
+        console.log(
+          '[AgendaPage] NavigationEnd → agenda:',
+          (e as NavigationEnd).urlAfterRedirects
+        );
+        void this.cargarCitas();
+      });
   }
 
-  // Actualizar al regresar a la página
+  ngOnDestroy(): void {
+    this.refreshSub?.unsubscribe();
+    this.routerSub?.unsubscribe();
+  }
+
+  // Capa 1: se dispara al entrar al tab o con pop real
   async ionViewWillEnter(): Promise<void> {
-    if (this.initialized) {
-      await this.cargarPacientes();
-      await this.cargarCitas();
-    }
+    console.log('[AgendaPage] ionViewWillEnter');
+    await this.cargarCitas();
   }
 
-  // Cargar citas de la fecha seleccionada
   async cargarCitas(): Promise<void> {
-    this.cargando = true;
-    this.errorCargandoCitas = false;
+    if (this.cargaEnCurso) {
+      this.refrescoPendiente = true;
+      return;
+    }
+
+    this.cargaEnCurso = true;
+
+    this.cargando.set(true);
+    this.errorCargandoCitas.set(false);
+    this.cdr.detectChanges();
 
     try {
-      this.citas = await this.agenda.cargarCitas(
-        this.fechaSeleccionada
-      );
+      do {
+        this.refrescoPendiente = false;
+
+        const fecha = this.fechaSeleccionada;
+        console.log('[AgendaPage] Consultando fecha:', fecha);
+
+        const resultado = await this.agenda.cargarCitas(fecha);
+
+        this.citas.set([...(resultado ?? [])]);
+
+        console.log(
+          '[AgendaPage] Citas actualizadas:',
+          this.citas().length,
+          this.citas()
+        );
+
+        this.cdr.detectChanges();
+
+      } while (this.refrescoPendiente);
+
     } catch (error) {
-      console.error(
-        '[AgendaPage] Error cargando citas:',
-        error
-      );
+      console.error('[AgendaPage] Error cargando citas:', error);
 
-      this.errorCargandoCitas = true;
+      this.errorCargandoCitas.set(true);
+      this.cdr.detectChanges();
 
-      await this.toast(
-        'No se pudieron cargar las citas',
-        'danger'
-      );
+      await this.toast('No se pudieron cargar las citas', 'danger');
+
     } finally {
-      this.cargando = false;
+      this.cargando.set(false);
+      this.cargaEnCurso = false;
+      this.cdr.detectChanges();
+
+      console.log('[AgendaPage] Carga finalizada');
+
+      if (this.refrescoPendiente) {
+        this.refrescoPendiente = false;
+        void this.cargarCitas();
+      }
     }
   }
 
-  // Cambiar la fecha del listado
   async onFechaChange(): Promise<void> {
     await this.cargarCitas();
   }
 
-
-async cargarPacientes(): Promise<void> {
-  try {
-    this.pacientes = await this.agenda.cargarPacientes();
-  } catch (error) {
-    console.error(
-      '[AgendaPage] Error cargando pacientes:',
-      error
-    );
-
-    await this.toast(
-      'No se pudieron cargar los pacientes',
-      'danger'
-    );
-  }
-}
-
-
-  // Abrir formulario para una nueva cita
   abrirNuevaCita(): void {
-    this.citaEnEdicion = null;
-
-    this.citaForm = {
-      paciente_id: null,
-      hora: '',
-      tipo: 'Consulta',
-      procedimiento: '',
-      notas: ''
-    };
-
-    this.mostrarFormulario = true;
+    void this.router.navigate(['/nueva-cita'])
+      .catch(e => console.error('[AgendaPage] Error nueva cita:', e));
   }
 
-  // Abrir formulario para editar una cita
+  verDetalle(cita: CitaDetalle): void {
+    void this.router.navigate(['/detalle-cita', cita.id])
+      .catch(e => console.error('[AgendaPage] Error detalle:', e));
+  }
+
   abrirEdicion(cita: CitaDetalle): void {
-    this.citaEnEdicion = cita.id;
-
-    this.citaForm = {
-      paciente_id: cita.paciente_id,
-      hora: cita.hora,
-      tipo: cita.tipo || 'Consulta',
-      procedimiento: cita.procedimiento || '',
-      notas: cita.notas || ''
-    };
-
-    this.mostrarFormulario = true;
+    void this.router.navigate(['/editar-cita', cita.id])
+      .catch(e => console.error('[AgendaPage] Error edición:', e));
   }
 
-  // Cerrar formulario
-  cerrarFormulario(): void {
-    if (this.guardando) {
-      return;
-    }
-
-    this.mostrarFormulario = false;
+  contarEstado(estado: string): number {
+    return this.citas().filter(c => c.estado === estado).length;
   }
 
-  // Crear o actualizar cita
-  async guardarCita(): Promise<void> {
-    if (
-      this.citaForm.paciente_id === null ||
-      !this.citaForm.hora ||
-      this.guardando
-    ) {
-      return;
-    }
-
-    this.guardando = true;
-
-    try {
-      const datos = {
-        paciente_id: this.citaForm.paciente_id,
-        fecha: this.fechaSeleccionada,
-        hora: this.citaForm.hora,
-        tipo: this.citaForm.tipo,
-        procedimiento: this.citaForm.procedimiento,
-        notas: this.citaForm.notas
-      };
-
-      if (this.citaEnEdicion !== null) {
-        await this.agenda.actualizarCita(
-          this.citaEnEdicion,
-          datos
-        );
-      } else {
-        await this.agenda.crearCita(datos);
-      }
-
-      const esEdicion = this.citaEnEdicion !== null;
-
-      this.mostrarFormulario = false;
-      this.citaEnEdicion = null;
-
-      await this.cargarCitas();
-
-      await this.toast(
-        esEdicion
-          ? 'Cita actualizada correctamente'
-          : 'Cita creada correctamente',
-        'success'
-      );
-    } catch (error) {
-      console.error(
-        '[AgendaPage] Error guardando cita:',
-        error
-      );
-
-      await this.toast(
-        'No se pudo guardar la cita',
-        'danger'
-      );
-    } finally {
-      this.guardando = false;
+  colorEstado(estado: string): string {
+    switch (estado) {
+      case 'realizada':  return 'success';
+      case 'cancelada':  return 'danger';
+      case 'pendiente':
+      default:           return 'warning';
     }
   }
 
-  
+  textoEstado(estado: string): string {
+    switch (estado) {
+      case 'realizada':  return 'Realizada';
+      case 'cancelada':  return 'Cancelada';
+      case 'pendiente':
+      default:           return 'Pendiente';
+    }
+  }
 
-  // Cambiar estado de una cita
   async cambiarEstado(
     cita: CitaDetalle,
     estado: 'realizada' | 'cancelada'
   ): Promise<void> {
     try {
-      await this.agenda.cambiarEstadoCita(
-        cita.id,
-        estado
-      );
-
+      await this.agenda.cambiarEstadoCita(cita.id, estado);
       await this.cargarCitas();
-
       await this.toast(
         estado === 'realizada'
           ? 'Cita marcada como realizada'
@@ -258,70 +219,54 @@ async cargarPacientes(): Promise<void> {
         'success'
       );
     } catch (error) {
-      console.error(
-        '[AgendaPage] Error cambiando estado:',
-        error
-      );
-
-      await this.toast(
-        'No se pudo cambiar el estado de la cita',
-        'danger'
-      );
+      console.error('[AgendaPage] Error cambiando estado:', error);
+      await this.toast('No se pudo cambiar el estado de la cita', 'danger');
     }
   }
 
-  // Confirmar eliminación
-  async confirmarEliminar(
-    cita: CitaDetalle
-  ): Promise<void> {
+  async confirmarCancelar(cita: CitaDetalle): Promise<void> {
+    const alerta = await this.alertController.create({
+      header: 'Cancelar cita',
+      message: `¿Deseas cancelar la cita de ${cita.paciente}? Se conservará en el historial.`,
+      buttons: [
+        { text: 'Volver', role: 'cancel' },
+        {
+          text: 'Cancelar cita',
+          role: 'destructive',
+          handler: () => { void this.cambiarEstado(cita, 'cancelada'); }
+        }
+      ]
+    });
+    await alerta.present();
+  }
+
+  async confirmarEliminar(cita: CitaDetalle): Promise<void> {
     const alerta = await this.alertController.create({
       header: 'Eliminar cita',
       message: `¿Deseas eliminar la cita de ${cita.paciente}? Esta acción no se puede deshacer.`,
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        { text: 'Volver', role: 'cancel' },
         {
           text: 'Eliminar',
           role: 'destructive',
-          handler: () => {
-            void this.eliminarCita(cita.id);
-          }
+          handler: () => { void this.eliminarCita(cita.id); }
         }
       ]
     });
-
     await alerta.present();
   }
 
-  // Eliminar cita
-  private async eliminarCita(
-    id: number
-  ): Promise<void> {
+  private async eliminarCita(id: number): Promise<void> {
     try {
       await this.agenda.eliminarCita(id);
-
       await this.cargarCitas();
-
-      await this.toast(
-        'Cita eliminada correctamente',
-        'success'
-      );
+      await this.toast('Cita eliminada correctamente', 'success');
     } catch (error) {
-      console.error(
-        '[AgendaPage] Error eliminando cita:',
-        error
-      );
-
-      await this.toast(
-        'No se pudo eliminar la cita',
-        'danger'
-      );
+      console.error('[AgendaPage] Error eliminando cita:', error);
+      await this.toast('No se pudo eliminar la cita', 'danger');
     }
   }
 
-  // Mostrar notificaciones
   private async toast(
     mensaje: string,
     color: 'success' | 'danger' | 'warning' = 'success'
@@ -332,7 +277,6 @@ async cargarPacientes(): Promise<void> {
       position: 'bottom',
       color
     });
-
     await toast.present();
   }
 }

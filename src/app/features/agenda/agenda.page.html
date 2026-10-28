@@ -1,379 +1,347 @@
-
-<ion-header class="ion-no-border pt-1.5">
-  <ion-toolbar class="!p-0 [--background:#ffffff]">
-    <div class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+<ion-header>
+  <ion-toolbar>
+    <div class="flex items-center justify-between px-4 py-3">
       <div>
-        <h1 class="text-xl font-bold tracking-tight text-slate-900">Agenda</h1>
-        <p class="mt-1 text-sm text-slate-500">
-          Administra las citas de tu consultorio
+        <h1 class="text-xl font-bold">Mi agenda</h1>
+        <p class="text-sm text-gray-500">
+          Administra tus consultas médicas
         </p>
       </div>
 
-      <ion-button
-        type="button"
-        (click)="abrirNuevaCita()"
-        class="">
-        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-        <span class="hidden sm:inline">Nueva cita</span>
+      <ion-button (click)="abrirNuevaCita()">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Nueva cita
       </ion-button>
     </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <main class="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-8 pt-5 sm:px-6">
+<ion-content class="ion-padding">
 
-    <!-- Selector de fecha -->
-    <section class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
-      <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2D5080]">
-          <ion-icon name="calendar-outline" class="text-2xl"></ion-icon>
-        </div>
+  <!-- Selector de fecha -->
+  <section class="mb-5">
+    <ion-item lines="none" class="rounded-xl">
+      <ion-icon
+        name="calendar-outline"
+        slot="start"
+        color="primary">
+      </ion-icon>
 
-        <div class="min-w-0 flex-1">
-          <h2 class="text-base font-bold text-slate-800">Agenda del día</h2>
-          <p class="mt-1 text-xs text-slate-500">
-            Selecciona la fecha que quieres consultar
-          </p>
-        </div>
-      </div>
+      <ion-label position="stacked">
+        Consultas del día
+      </ion-label>
 
-      <div class="mt-4">
-        <input
-          type="date"
-          name="fechaSeleccionada"
-          [(ngModel)]="fechaSeleccionada"
-          (ngModelChange)="onFechaChange()"
-          class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-[#3B6B9E] focus:ring-2 focus:ring-blue-100" />
-      </div>
-    </section>
+      <input
+        type="date"
+        name="fechaSeleccionada"
+        class="w-full bg-transparent py-3 outline-none"
+        [(ngModel)]="fechaSeleccionada"
+        (ngModelChange)="onFechaChange()">
+    </ion-item>
+  </section>
 
-    <!-- Encabezado -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <h2 class="text-lg font-bold text-slate-800">Citas programadas</h2>
-          <p class="mt-1 text-sm text-slate-500">
-            Consulta y administra tus citas
-          </p>
-        </div>
+  <!-- Resumen de citas -->
+  <section class="grid grid-cols-3 gap-3 mb-6">
 
-        <span class="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-[#2D5080]">
-          {{ citas.length }} {{ citas.length === 1 ? 'cita' : 'citas' }}
-        </span>
-      </div>
+    <div class="rounded-2xl bg-blue-50 p-4 text-center">
+      <ion-icon
+        name="calendar-outline"
+        class="text-2xl text-blue-700">
+      </ion-icon>
 
-      <!-- Cargando -->
-      <div
-        *ngIf="cargando"
-        class="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white px-5 py-12 text-center">
+      <p class="mt-2 text-sm text-gray-600">Total</p>
+
+      <h2 class="text-2xl font-bold text-blue-800">
+        {{ citas().length }}
+      </h2>
+    </div>
+
+    <div class="rounded-2xl bg-amber-50 p-4 text-center">
+      <ion-icon
+        name="time-outline"
+        class="text-2xl text-amber-700">
+      </ion-icon>
+
+      <p class="mt-2 text-sm text-gray-600">Pendientes</p>
+
+      <h2 class="text-2xl font-bold text-amber-800">
+        {{ contarEstado('pendiente') }}
+      </h2>
+    </div>
+
+    <div class="rounded-2xl bg-green-50 p-4 text-center">
+      <ion-icon
+        name="checkmark-circle-outline"
+        class="text-2xl text-green-700">
+      </ion-icon>
+
+      <p class="mt-2 text-sm text-gray-600">Realizadas</p>
+
+      <h2 class="text-2xl font-bold text-green-800">
+        {{ contarEstado('realizada') }}
+      </h2>
+    </div>
+
+  </section>
+
+  <!-- Cargando -->
+  <div
+    *ngIf="cargando()"
+    class="flex flex-col items-center justify-center py-12">
+
+    <ion-spinner name="crescent"></ion-spinner>
+
+    <p class="mt-3 text-sm text-gray-500">
+      Cargando tus consultas...
+    </p>
+  </div>
+
+  <!-- Error -->
+  <div
+    *ngIf="!cargando() && errorCargandoCitas()"
+    class="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+
+    <ion-icon
+      name="alert-circle-outline"
+      class="text-4xl text-red-600">
+    </ion-icon>
+
+    <h3 class="mt-3 font-semibold text-red-800">
+      No se pudo cargar la agenda
+    </h3>
+
+    <p class="mt-2 text-sm text-red-700">
+      Comprueba la conexión con la base de datos e inténtalo de nuevo.
+    </p>
+
+    <ion-button
+      class="mt-3"
+      color="danger"
+      fill="outline"
+      (click)="cargarCitas()">
+
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Contenido de la agenda -->
+  <section *ngIf="!cargando() && !errorCargandoCitas()">
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold">
+        Citas programadas
+      </h2>
+
+      <span class="text-sm text-gray-500">
+        {{ citas().length }} registro(s)
+      </span>
+    </div>
+
+    <!-- Agenda vacía -->
+    <div
+      *ngIf="citas().length === 0"
+      class="rounded-2xl border border-dashed border-gray-300 p-8 text-center">
+
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
         <ion-icon
-          name="hourglass-outline"
-          class="animate-pulse text-3xl text-[#3B6B9E]">
+          name="calendar-clear-outline"
+          class="text-4xl text-blue-700">
         </ion-icon>
-        <p class="mt-3 text-sm font-medium text-slate-600">
-          Cargando citas...
-        </p>
       </div>
 
-      <!-- Error al consultar -->
-      <div
-        *ngIf="!cargando && errorCargandoCitas"
-        class="rounded-2xl border border-red-100 bg-white px-5 py-10 text-center">
-        <ion-icon name="alert-circle-outline" class="text-3xl text-red-500"></ion-icon>
-        <h3 class="mt-3 font-bold text-slate-800">
-          No se pudieron cargar las citas
-        </h3>
-        <p class="mt-2 text-sm text-slate-500">
-          Comprueba la conexión con la base de datos e inténtalo de nuevo.
-        </p>
-        <button
-          type="button"
-          (click)="cargarCitas()"
-          class="mt-4 rounded-xl bg-[#2D5080] px-5 py-3 text-sm font-semibold text-white">
-          Reintentar
-        </button>
-      </div>
+      <h3 class="mt-4 text-lg font-bold">
+        Tu agenda está libre
+      </h3>
 
-      <!-- Lista de citas -->
-      <div
-        *ngIf="!cargando && !errorCargandoCitas && citas.length > 0"
-        class="space-y-3">
+      <p class="mt-2 text-sm text-gray-500">
+        No hay consultas registradas para esta fecha.
+      </p>
 
-        <article
-          *ngFor="let cita of citas"
-          class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+      <ion-button
+        class="mt-4"
+        (click)="abrirNuevaCita()">
 
-          <div class="flex gap-3 p-4 sm:gap-4 sm:p-5">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Agendar primera cita
+      </ion-button>
+    </div>
 
-            <!-- Hora -->
-            <div class="flex w-[68px] shrink-0 flex-col items-center justify-center self-start rounded-xl bg-blue-50 px-2 py-3">
-              <ion-icon name="time-outline" class="mb-1 text-lg text-[#3B6B9E]"></ion-icon>
-              <strong class="text-sm font-bold text-[#2D5080]">
-                {{ cita.hora }}
-              </strong>
+    <!-- Lista de citas -->
+    <div class="flex flex-col gap-4">
+
+      <article
+        *ngFor="let cita of citas()"
+        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+        <!-- Cabecera -->
+        <div class="flex items-start justify-between gap-3 p-4">
+
+          <div class="flex min-w-0 items-start gap-3">
+
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+              <ion-icon
+                name="person-outline"
+                class="text-2xl text-blue-700">
+              </ion-icon>
             </div>
 
-            <!-- Información -->
-            <div class="min-w-0 flex-1">
-              <h3 class="break-words text-base font-bold text-slate-800">
+            <div class="min-w-0">
+              <h3 class="font-bold text-gray-900">
                 {{ cita.paciente }}
               </h3>
 
-              <p class="mt-1 text-sm text-slate-500">
-                {{ cita.tipo || 'Consulta general' }}
+              <p class="mt-1 text-sm text-gray-500">
+                {{ cita.tipo || 'Consulta' }}
               </p>
-
-              <p *ngIf="cita.procedimiento" class="mt-2 break-words text-sm text-slate-600">
-                <span class="font-semibold">Procedimiento:</span>
-                {{ cita.procedimiento }}
-              </p>
-
-              <p *ngIf="cita.notas" class="mt-2 break-words text-sm leading-5 text-slate-500">
-                {{ cita.notas }}
-              </p>
-
-              <!-- Estados almacenados en minúsculas -->
-              <div class="mt-3">
-                <ion-badge
-                  class="!rounded-full !px-3 !py-1"
-                  [color]="cita.estado === 'realizada' ? 'success' : cita.estado === 'cancelada' ? 'danger' : 'warning'">
-                  {{ cita.estado === 'realizada' ? 'Realizada' : cita.estado === 'cancelada' ? 'Cancelada' : 'Pendiente' }}
-                </ion-badge>
-              </div>
             </div>
+
           </div>
 
-          <!-- Acciones -->
-          <div class="flex flex-wrap items-center gap-2 border-t border-slate-100 bg-slate-50/70 px-4 py-3 sm:px-5">
+          <ion-badge
+            class="shrink-0"
+            [color]="colorEstado(cita.estado)">
 
-            <button
-              type="button"
-              (click)="abrirEdicion(cita)"
-              [disabled]="cita.estado === 'cancelada' || cita.estado === 'realizada'"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-40">
-              <ion-icon name="create-outline" class="text-base"></ion-icon>
-              Editar
-            </button>
+            {{ textoEstado(cita.estado) }}
+          </ion-badge>
 
-            <button
-              *ngIf="cita.estado !== 'realizada' && cita.estado !== 'cancelada'"
-              type="button"
-              (click)="cambiarEstado(cita, 'realizada')"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-              <ion-icon name="checkmark-circle-outline" class="text-base"></ion-icon>
-              Realizada
-            </button>
-
-            <button
-              *ngIf="cita.estado !== 'cancelada' && cita.estado !== 'realizada'"
-              type="button"
-              (click)="cambiarEstado(cita, 'cancelada')"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
-              <ion-icon name="close-circle-outline" class="text-base"></ion-icon>
-              Cancelar
-            </button>
-
-            <button
-              type="button"
-              (click)="confirmarEliminar(cita)"
-              class="ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50">
-              <ion-icon name="trash-outline" class="text-base"></ion-icon>
-              Eliminar
-            </button>
-          </div>
-        </article>
-      </div>
-
-      <!-- Agenda vacía -->
-      <div
-        *ngIf="!cargando && !errorCargandoCitas && citas.length === 0"
-        class="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-10 text-center sm:py-14">
-
-        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-[#2D5080]">
-          <ion-icon name="calendar-outline" class="text-4xl"></ion-icon>
         </div>
 
-        <h3 class="mt-5 text-lg font-bold text-slate-800">
-          No hay citas aún
-        </h3>
+        <!-- Información -->
+        <div class="space-y-3 px-4 pb-4">
 
-        <p class="mt-2 max-w-xs text-sm leading-6 text-slate-500">
-          No tienes citas registradas para esta fecha. Puedes agregar una nueva cita cuando lo necesites.
-        </p>
+          <div class="flex items-center gap-3 text-sm text-gray-600">
+            <ion-icon
+              name="time-outline"
+              class="text-xl text-blue-700">
+            </ion-icon>
 
-        <ion-button
-          type="button"
-          (click)="abrirNuevaCita()"
-          class="">
-          <ion-icon name="add-circle-outline" class="text-lg"></ion-icon>
-          Crear primera cita
-        </ion-button>
-      </div>
-    </section>
-  </main>
+            <span>
+              <strong>Hora:</strong> {{ cita.hora }}
+            </span>
+          </div>
 
-  <!-- Modal de nueva cita y edición -->
-  <ion-modal
-    [isOpen]="mostrarFormulario"
-    (didDismiss)="cerrarFormulario()"
-    [backdropDismiss]="!guardando"
-    class="agenda-modal">
+          <div
+            *ngIf="cita.procedimiento"
+            class="flex items-start gap-3 text-sm text-gray-600">
 
-    <ng-template>
-      <ion-header class="ion-no-border">
-        <ion-toolbar class="!p-0 [--background:#ffffff]">
-          <div class="flex items-center justify-between gap-3 px-4 py-3">
+            <ion-icon
+              name="medical-outline"
+              class="text-xl text-blue-700">
+            </ion-icon>
+
             <div>
-              <h2 class="text-lg font-bold text-slate-900">
-                {{ citaEnEdicion !== null ? 'Editar cita' : 'Nueva cita' }}
-              </h2>
-              <p class="mt-1 text-xs text-slate-500">
-                Completa la información de la cita
+              <p class="font-semibold text-gray-800">
+                Procedimiento
+              </p>
+
+              <p class="mt-1">
+                {{ cita.procedimiento }}
               </p>
             </div>
-
-            <button
-              type="button"
-              aria-label="Cerrar formulario"
-              [disabled]="guardando"
-              (click)="cerrarFormulario()"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 disabled:opacity-50">
-              <ion-icon name="close-outline" class="text-2xl"></ion-icon>
-            </button>
-          </div>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-content>
-        <form
-          #formCita="ngForm"
-          (ngSubmit)="guardarCita()"
-          class="mx-auto flex w-full max-w-xl flex-col gap-5 px-4 py-5 sm:px-6">
-
-          <!-- Paciente -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">
-              Paciente <span class="text-red-500">*</span>
-            </label>
-
-            <ion-select
-              name="paciente_id"
-              [(ngModel)]="citaForm.paciente_id"
-              interface="action-sheet"
-              placeholder="Selecciona un paciente"
-              required
-              class="min-h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
-
-              <ion-select-option
-                *ngFor="let paciente of pacientes"
-                [value]="paciente.id">
-                {{ paciente.nombre }}
-              </ion-select-option>
-            </ion-select>
-
-            <p *ngIf="pacientes.length === 0" class="text-xs leading-5 text-amber-700">
-              No hay pacientes registrados. Registra un paciente antes de crear una cita.
-            </p>
           </div>
 
-          <!-- Hora -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">
-              Hora <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="time"
-              name="hora"
-              [(ngModel)]="citaForm.hora"
-              required
-              class="block min-h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none focus:border-[#3B6B9E] focus:ring-2 focus:ring-blue-100" />
+          <div
+            *ngIf="cita.notas"
+            class="flex items-start gap-3 text-sm text-gray-600">
+
+            <ion-icon
+              name="document-text-outline"
+              class="text-xl text-blue-700">
+            </ion-icon>
+
+            <div>
+              <p class="font-semibold text-gray-800">
+                Notas
+              </p>
+
+              <p class="mt-1">
+                {{ cita.notas }}
+              </p>
+            </div>
           </div>
 
-          <!-- Tipo -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">
-              Tipo de cita
-            </label>
-            <ion-select
-              name="tipo"
-              [(ngModel)]="citaForm.tipo"
-              interface="action-sheet"
-              placeholder="Selecciona el tipo"
-              class="min-h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
+        </div>
 
-              <ion-select-option value="Consulta">Consulta</ion-select-option>
-              <ion-select-option value="Revisión">Revisión</ion-select-option>
-              <ion-select-option value="Limpieza">Limpieza</ion-select-option>
-            </ion-select>
-          </div>
+        <!-- Acciones -->
+        <div class="flex flex-wrap gap-2 border-t border-gray-100 bg-gray-50 p-3">
 
-          <!-- Procedimiento -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">
-              Procedimiento
-            </label>
-            <input
-              type="text"
-              name="procedimiento"
-              [(ngModel)]="citaForm.procedimiento"
-              placeholder="Ej. revisión general"
-              class="block min-h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none focus:border-[#3B6B9E] focus:ring-2 focus:ring-blue-100" />
-          </div>
+          <ion-button
+            size="small"
+            fill="outline"
+            (click)="verDetalle(cita)">
 
-          <!-- Notas -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">
-              Notas adicionales
-            </label>
-            <textarea
-              name="notas"
-              [(ngModel)]="citaForm.notas"
-              rows="3"
-              placeholder="Información adicional de la cita..."
-              class="block w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-6 text-slate-700 outline-none focus:border-[#3B6B9E] focus:ring-2 focus:ring-blue-100"></textarea>
-          </div>
+            <ion-icon
+              name="eye-outline"
+              slot="start">
+            </ion-icon>
 
-          <!-- Fecha -->
-          <div class="rounded-xl bg-blue-50 px-4 py-3">
-            <p class="text-xs font-medium text-[#2D5080]">
-              <ion-icon name="calendar-outline" class="mr-1 align-middle"></ion-icon>
-              Fecha de la cita
-            </p>
-            <p class="mt-1 text-sm font-bold text-[#2D5080]">
-              {{ fechaSeleccionada }}
-            </p>
-          </div>
+            Detalles
+          </ion-button>
 
-          <!-- Botones -->
-          <div class="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              [disabled]="guardando"
-              (click)="cerrarFormulario()"
-              class="min-h-12 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-slate-600 disabled:opacity-50">
-              Cancelar
-            </button>
+          <ion-button
+            *ngIf="cita.estado === 'pendiente'"
+            size="small"
+            fill="outline"
+            (click)="abrirEdicion(cita)">
 
-            <button
-              type="submit"
-              [disabled]="guardando || pacientes.length === 0 || !formCita.valid"
-              class="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#2D5080] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+            <ion-icon
+              name="create-outline"
+              slot="start">
+            </ion-icon>
 
-              <ion-icon
-                *ngIf="!guardando"
-                [name]="citaEnEdicion !== null ? 'checkmark-outline' : 'add-outline'"
-                class="text-lg">
-              </ion-icon>
+            Editar
+          </ion-button>
 
-              <span *ngIf="guardando">Guardando...</span>
-              <span *ngIf="!guardando">
-                {{ citaEnEdicion !== null ? 'Guardar cambios' : 'Crear cita' }}
-              </span>
-            </button>
-          </div>
-        </form>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+          <ion-button
+            *ngIf="cita.estado === 'pendiente'"
+            size="small"
+            color="success"
+            fill="outline"
+            (click)="cambiarEstado(cita, 'realizada')">
+
+            <ion-icon
+              name="checkmark-circle-outline"
+              slot="start">
+            </ion-icon>
+
+            Realizada
+          </ion-button>
+
+          <ion-button
+            *ngIf="cita.estado === 'pendiente'"
+            size="small"
+            color="warning"
+            fill="outline"
+            (click)="confirmarCancelar(cita)">
+
+            <ion-icon
+              name="close-circle-outline"
+              slot="start">
+            </ion-icon>
+
+            Cancelar
+          </ion-button>
+
+          <ion-button
+            size="small"
+            color="danger"
+            fill="clear"
+            (click)="confirmarEliminar(cita)">
+
+            <ion-icon
+              name="trash-outline"
+              slot="start">
+            </ion-icon>
+
+            Eliminar
+          </ion-button>
+
+        </div>
+
+      </article>
+
+    </div>
+  </section>
+
 </ion-content>

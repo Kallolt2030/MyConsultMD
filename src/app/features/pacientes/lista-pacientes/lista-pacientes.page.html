@@ -14,6 +14,12 @@
         </p>
       </div>
 
+      <div class="rounded-xl bg-yellow-100 p-3 text-black">
+        Cargando: {{ cargando ? 'Sí' : 'No' }} |
+        Total: {{ pacientes.length }} |
+        Filtrados: {{ pacientesFiltrados.length }}
+      </div>
+
       <ion-button
         class="boton-principal"
         (click)="abrirRegistro()">

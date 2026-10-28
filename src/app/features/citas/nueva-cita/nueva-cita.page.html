@@ -1,13 +1,186 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>nueva-cita</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button
+        defaultHref="/tabs/agenda">
+      </ion-back-button>
+    </ion-buttons>
+
+    <ion-title>Nueva cita</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">nueva-cita</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+
+  <!-- Encabezado -->
+  <div class="mb-5">
+    <h1 class="text-2xl font-bold">Registrar consulta</h1>
+    <p class="text-gray-500">
+      Completa los datos para agendar una nueva cita.
+    </p>
+  </div>
+
+  <!-- Cargando pacientes -->
+  <div *ngIf="cargando" class="flex flex-col items-center py-8">
+  <ion-spinner name="crescent"></ion-spinner>
+  <p class="text-gray-500 mt-3">Cargando pacientes...</p>
+</div>
+
+  <!-- Formulario -->
+  <form
+    *ngIf="!cargando"
+    #formulario="ngForm"
+    (ngSubmit)="guardarCita()">
+
+    <!-- Seleccionar paciente -->
+    <ion-item class="mb-3" lines="inset">
+      <ion-label position="stacked">Paciente *</ion-label>
+
+      <ion-select
+        name="paciente_id"
+        [(ngModel)]="citaForm.paciente_id"
+        placeholder="Selecciona un paciente"
+        interface="popover"
+        required>
+
+        <ion-select-option
+          *ngFor="let paciente of pacientes"
+          [value]="paciente.id">
+
+          {{ paciente.nombre }}
+
+        </ion-select-option>
+
+      </ion-select>
+    </ion-item>
+
+    <!-- Mensaje cuando no hay pacientes -->
+    <div
+      *ngIf="pacientes.length === 0"
+      class="rounded-xl bg-yellow-50 p-4 mb-4">
+
+      <p class="text-sm text-yellow-800">
+        No hay pacientes registrados. Registra un paciente antes de agendar
+        una consulta.
+      </p>
+
+    </div>
+
+    <!-- Fecha -->
+    <ion-item class="mb-3" lines="inset">
+      <ion-label position="stacked">Fecha de la cita *</ion-label>
+
+      <ion-input
+        type="date"
+        name="fecha"
+        [(ngModel)]="citaForm.fecha"
+        required>
+      </ion-input>
+    </ion-item>
+
+    <!-- Hora -->
+    <ion-item class="mb-3" lines="inset">
+      <ion-label position="stacked">Hora de la cita *</ion-label>
+
+      <ion-input
+        type="time"
+        name="hora"
+        [(ngModel)]="citaForm.hora"
+        required>
+      </ion-input>
+    </ion-item>
+
+    <!-- Tipo de consulta -->
+    <ion-item class="mb-3" lines="inset">
+      <ion-label position="stacked">Tipo de consulta *</ion-label>
+
+      <ion-select
+        name="tipo"
+        [(ngModel)]="citaForm.tipo"
+        interface="popover"
+        required>
+
+        <ion-select-option value="Consulta">
+          Consulta
+        </ion-select-option>
+
+        <ion-select-option value="Revision">
+          Revisión
+        </ion-select-option>
+
+        <ion-select-option value="Seguimiento">
+          Seguimiento
+        </ion-select-option>
+
+        <ion-select-option value="Urgencia">
+          Urgencia
+        </ion-select-option>
+
+      </ion-select>
+    </ion-item>
+
+    <!-- Procedimiento -->
+    <ion-item class="mb-3" lines="inset">
+      <ion-label position="stacked">Procedimiento</ion-label>
+
+      <ion-textarea
+        name="procedimiento"
+        [(ngModel)]="citaForm.procedimiento"
+        placeholder="Describe el procedimiento o tratamiento"
+        [autoGrow]="true"
+        rows="3">
+      </ion-textarea>
+    </ion-item>
+
+    <!-- Notas -->
+    <ion-item class="mb-5" lines="inset">
+      <ion-label position="stacked">Notas adicionales</ion-label>
+
+      <ion-textarea
+        name="notas"
+        [(ngModel)]="citaForm.notas"
+        placeholder="Indicaciones u observaciones de la consulta"
+        [autoGrow]="true"
+        rows="3">
+      </ion-textarea>
+    </ion-item>
+
+    <!-- Botones -->
+    <div class="flex flex-col gap-3 mt-6">
+
+      <ion-button
+        type="submit"
+        expand="block"
+        [disabled]="guardando || cargando || pacientes.length === 0">
+
+        <ion-spinner
+          *ngIf="guardando"
+          name="crescent"
+          class="mr-2">
+        </ion-spinner>
+
+        {{ guardando ? 'Guardando consulta...' : 'Guardar consulta' }}
+
+      </ion-button>
+
+      <ion-button
+        type="button"
+        expand="block"
+        fill="outline"
+        color="medium"
+        [disabled]="guardando"
+        (click)="iraAgenda()">
+
+        Cancelar
+
+      </ion-button>
+
+    </div>
+
+    <p class="text-xs text-gray-500 mt-4">
+      * Campos obligatorios.
+    </p>
+
+  </form>
+
 </ion-content>

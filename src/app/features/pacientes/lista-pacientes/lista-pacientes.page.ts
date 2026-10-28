@@ -3,7 +3,8 @@ import {
   Component,
   EventEmitter,
   OnInit,
-  Output
+  Output,
+  ChangeDetectorRef
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -17,7 +18,6 @@ import {
   IonSpinner,
   IonAlert,
   IonItem,
-  IonBadge
 } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
@@ -58,7 +58,6 @@ export interface PacienteLista {
     IonInput,
     IonItem,
     IonSpinner,
-    IonBadge,
     IonAlert
   ],
   templateUrl: './lista-pacientes.page.html',
@@ -82,7 +81,8 @@ export class ListaPacientesComponent implements OnInit {
   pacienteAEliminar: PacienteLista | null = null;
 
   constructor(
-    private pacientesService: PacientesService
+    private pacientesService: PacientesService,
+    private cdr:ChangeDetectorRef
   ) {
     addIcons({
       searchOutline,
@@ -102,21 +102,41 @@ export class ListaPacientesComponent implements OnInit {
     void this.cargarPacientes();
   }
 
-  async cargarPacientes(): Promise<void> {
-    this.cargando = true;
-    this.error = '';
+async cargarPacientes(): Promise<void> {
+  this.cargando = true;
+  this.error = '';
+  this.cdr.detectChanges();
 
-    try {
-      const resultado = await this.pacientesService.cargarPacientes();
+  try {
+    const resultado = await this.pacientesService.cargarPacientes();
 
-      this.pacientes = resultado as PacienteLista[];
-    } catch (e) {
-      console.error('Error al cargar pacientes:', e);
-      this.error = 'No se pudieron cargar los pacientes.';
-    } finally {
-      this.cargando = false;
-    }
+    this.pacientes = (resultado ?? [])
+      .filter(paciente => paciente.id !== undefined)
+      .map(paciente => ({
+        ...paciente,
+        id: paciente.id!
+      }));
+
+    console.log('[Pacientes] Cargados:', this.pacientes);
+  } catch (e) {
+    console.error('[Pacientes] Error al cargar:', e);
+    this.error = 'No se pudieron cargar los pacientes.';
+    this.pacientes = [];
+  } finally {
+    this.cargando = false;
+    this.cdr.detectChanges();
+
+    console.log('[Pacientes] Estado final:', {
+      cargando: this.cargando,
+      total: this.pacientes.length,
+      filtrados: this.pacientesFiltrados.length
+    });
   }
+}
+
+  async ionViewWillEnter(): Promise<void> {
+  await this.cargarPacientes();
+}
 
   get pacientesFiltrados(): PacienteLista[] {
     const texto = this.busqueda.trim().toLowerCase();

@@ -1,13 +1,161 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>detalle-cita</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <!-- ✅ Cambiado: ion-button que llama a volverAgenda() -->
+      <ion-button (click)="volverAgenda()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Detalle de consulta</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">detalle-cita</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+
+  <!-- Cargando -->
+  <div class="estado-pagina" *ngIf="cargando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando información de la consulta...</p>
+  </div>
+
+  <!-- Error o consulta no encontrada -->
+  <div class="estado-pagina" *ngIf="!cargando && error">
+    <ion-icon name="alert-circle-outline" class="icono-estado"></ion-icon>
+    <h2>Consulta no encontrada</h2>
+    <p>No fue posible obtener la información de esta consulta.</p>
+
+    <!-- ✅ Cambiado: routerLink → (click)="volverAgenda()" -->
+    <ion-button expand="block" (click)="volverAgenda()">
+      Volver a la agenda
+    </ion-button>
+  </div>
+
+  <!-- Información de la consulta -->
+  <ng-container *ngIf="!cargando && !error && cita">
+
+    <div class="encabezado-detalle">
+      <ion-icon name="calendar-outline"></ion-icon>
+
+      <div>
+        <h2>Información de la consulta</h2>
+        <p>Consulta los datos registrados del paciente.</p>
+      </div>
+    </div>
+
+    <!-- Estado -->
+    <ion-card class="tarjeta-estado">
+      <ion-card-content>
+        <div class="fila-estado">
+          <div>
+            <p class="texto-secundario">Estado de la consulta</p>
+            <h2>{{ obtenerEstado(cita.estado) }}</h2>
+          </div>
+
+          <ion-badge
+            [color]="
+              cita.estado?.toLowerCase() === 'realizada'
+                ? 'success'
+                : cita.estado?.toLowerCase() === 'cancelada'
+                  ? 'danger'
+                  : 'warning'
+            ">
+            {{ obtenerEstado(cita.estado) }}
+          </ion-badge>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Paciente -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-outline"></ion-icon>
+          Datos del paciente
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="dato">
+          <span>Nombre del paciente</span>
+          <strong>{{ cita.paciente || 'No disponible' }}</strong>
+        </div>
+
+        <div class="dato">
+          <span>ID del paciente</span>
+          <strong>{{ cita.paciente_id }}</strong>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Fecha y hora -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="time-outline"></ion-icon>
+          Fecha y hora
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="dato">
+          <span>Fecha</span>
+          <strong>{{ cita.fecha }}</strong>
+        </div>
+
+        <div class="dato">
+          <span>Hora</span>
+          <strong>{{ cita.hora }}</strong>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Información médica -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="clipboard-outline"></ion-icon>
+          Detalles de la consulta
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="dato">
+          <span>Tipo de consulta</span>
+          <strong>{{ cita.tipo || 'Consulta general' }}</strong>
+        </div>
+
+        <div class="dato">
+          <span>Procedimiento</span>
+          <p>{{ cita.procedimiento || 'Sin procedimiento registrado' }}</p>
+        </div>
+
+        <div class="dato">
+          <span>Notas</span>
+          <p>{{ cita.notas || 'Sin notas adicionales' }}</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Acciones -->
+    <div class="acciones">
+      <ion-button
+        expand="block"
+        (click)="editarCita()"
+        [disabled]="cita.estado?.toLowerCase() === 'cancelada'">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        Editar consulta
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        color="medium"
+        (click)="volverAgenda()">
+        Volver a la agenda
+      </ion-button>
+    </div>
+
+  </ng-container>
+
 </ion-content>
