@@ -1,13 +1,323 @@
-<ion-header [translucent]="true">
+
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>configuracion</ion-title>
+    <div class="px-4 py-3">
+      <h1 class="text-xl font-bold text-gray-900">
+        Configuración
+      </h1>
+      <p class="text-sm text-gray-500">
+        Personaliza la información de tu consultorio
+      </p>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">configuracion</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+
+  <!-- Cargando -->
+  <div
+    *ngIf="cargando"
+    class="flex flex-col items-center justify-center py-16">
+
+    <ion-spinner name="crescent"></ion-spinner>
+
+    <p class="mt-3 text-sm text-gray-500">
+      Cargando información del consultorio...
+    </p>
+  </div>
+
+  <!-- Error -->
+  <div
+    *ngIf="!cargando && error"
+    class="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+
+    <ion-icon
+      name="alert-circle-outline"
+      class="text-4xl text-red-600">
+    </ion-icon>
+
+    <h3 class="mt-3 font-bold text-red-800">
+      No se pudo cargar la información
+    </h3>
+
+    <p class="mt-2 text-sm text-red-700">
+      {{ error }}
+    </p>
+
+    <ion-button
+      class="mt-3"
+      fill="outline"
+      color="danger"
+      (click)="cargarDatos()">
+
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Intentar nuevamente
+    </ion-button>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!cargando && !error" class="flex flex-col gap-5">
+
+    <!-- Presentación -->
+    <section class="rounded-2xl bg-blue-50 p-5">
+
+      <div class="flex items-center gap-4">
+
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
+          <ion-icon
+            name="business-outline"
+            class="text-4xl text-blue-700">
+          </ion-icon>
+        </div>
+
+        <div>
+          <h2 class="text-lg font-bold text-blue-950">
+            Mi consultorio
+          </h2>
+
+          <p class="mt-1 text-sm text-blue-800">
+            Administra los datos y horarios de tu establecimiento.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Información general -->
+    <section class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+
+      <div class="mb-5 flex items-center gap-3">
+
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
+          <ion-icon
+            name="business-outline"
+            class="text-2xl text-blue-700">
+          </ion-icon>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-gray-900">
+            Información general
+          </h3>
+
+          <p class="text-xs text-gray-500">
+            Datos principales del consultorio
+          </p>
+        </div>
+
+      </div>
+
+      <div class="flex flex-col gap-4">
+
+        <div class="campo">
+          <ion-label class="etiqueta">
+            Nombre del consultorio *
+          </ion-label>
+
+          <ion-input
+            [(ngModel)]="consultorio.nombre"
+            placeholder="Ej. Clínica San José"
+            fill="outline">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <ion-label class="etiqueta">
+            Profesional responsable *
+          </ion-label>
+
+          <ion-input
+            [(ngModel)]="consultorio.profesional"
+            placeholder="Nombre del profesional"
+            fill="outline">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <ion-label class="etiqueta">
+            Especialidad
+          </ion-label>
+
+          <ion-input
+            [(ngModel)]="consultorio.especialidad"
+            placeholder="Ej. Medicina general"
+            fill="outline">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <ion-label class="etiqueta">
+            Tipo de establecimiento
+          </ion-label>
+
+          <ion-select
+            [(ngModel)]="consultorio.tipo_establecimiento"
+            placeholder="Selecciona una opción"
+            fill="outline"
+            interface="popover">
+
+            <ion-select-option value="Consultorio médico">
+              Consultorio médico
+            </ion-select-option>
+
+            <ion-select-option value="Consultorio dental">
+              Consultorio dental
+            </ion-select-option>
+
+            <ion-select-option value="Clínica">
+              Clínica
+            </ion-select-option>
+
+            <ion-select-option value="Consultorio psicológico">
+              Consultorio psicológico
+            </ion-select-option>
+
+            <ion-select-option value="Otro">
+              Otro
+            </ion-select-option>
+
+          </ion-select>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Horario -->
+    <section class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+
+      <div class="mb-5 flex items-center gap-3">
+
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
+          <ion-icon
+            name="time-outline"
+            class="text-2xl text-blue-700">
+          </ion-icon>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-gray-900">
+            Horario de atención
+          </h3>
+
+          <p class="text-xs text-gray-500">
+            Establece tus horas de servicio
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Horas -->
+      <div class="grid grid-cols-2 gap-3">
+
+        <div class="campo">
+          <ion-label class="etiqueta">
+            Apertura
+          </ion-label>
+
+          <ion-input
+            type="time"
+            [(ngModel)]="consultorio.hora_inicio"
+            fill="outline">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <ion-label class="etiqueta">
+            Cierre
+          </ion-label>
+
+          <ion-input
+            type="time"
+            [(ngModel)]="consultorio.hora_cierre"
+            fill="outline">
+          </ion-input>
+        </div>
+
+      </div>
+
+      <!-- Días laborales -->
+      <div class="mt-6">
+
+        <div class="mb-3">
+          <h4 class="font-semibold text-gray-900">
+            Días laborales
+          </h4>
+
+          <p class="text-xs text-gray-500">
+            Selecciona los días que trabajas.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+
+          <div
+            *ngFor="let dia of diasDisponibles"
+            class="flex items-center gap-2 rounded-xl border p-3 transition-colors"
+            [ngClass]="diasSeleccionados.includes(dia)
+              ? 'border-blue-300 bg-blue-50'
+              : 'border-gray-200 bg-gray-50'">
+
+            <ion-checkbox
+              [checked]="diasSeleccionados.includes(dia)"
+              (ionChange)="cambiarDia(dia, $event.detail.checked)">
+            </ion-checkbox>
+
+            <span
+              class="text-sm font-medium"
+              [ngClass]="diasSeleccionados.includes(dia)
+                ? 'text-blue-800'
+                : 'text-gray-600'">
+              {{ dia }}
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Guardar -->
+    <section class="flex flex-col gap-3">
+
+      <ion-button
+        expand="block"
+        class="boton-guardar"
+        (click)="guardarCambios()"
+        [disabled]="guardando">
+
+        <ion-spinner
+          *ngIf="guardando"
+          name="crescent">
+        </ion-spinner>
+
+        <ng-container *ngIf="!guardando">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          Guardar cambios
+        </ng-container>
+
+        <span *ngIf="guardando">
+          Guardando...
+        </span>
+
+      </ion-button>
+
+      <div class="flex items-center justify-center gap-2 pb-3">
+
+        <ion-icon
+          name="shield-checkmark-outline"
+          class="text-lg text-green-600">
+        </ion-icon>
+
+        <p class="text-xs text-gray-500">
+          Tu información se almacena localmente en tu dispositivo.
+        </p>
+
+      </div>
+
+    </section>
+
+  </div>
+
 </ion-content>
