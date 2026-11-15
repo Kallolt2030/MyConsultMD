@@ -4,7 +4,9 @@ import {
   EventEmitter,
   Input,
   Output,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -34,10 +36,13 @@ import {
   createOutline,
   informationCircleOutline,
   linkOutline,
-  checkmarkCircleOutline
+  checkmarkCircleOutline,
+  cameraOutline,
+  imagesOutline
 } from 'ionicons/icons';
 
 import { PacientesService } from '../services/pacientes';
+import { FotoPacienteService } from '../services/foto-paciente';
 
 export interface PacienteDetalle {
   id: number;
@@ -47,6 +52,7 @@ export interface PacienteDetalle {
   telegram_chat_id?: string | null;
   telegram_vinculado?: number;
   fecha_registro?: string;
+  foto?: string | null;
 }
 
 interface RespuestaCodigo {
@@ -83,7 +89,8 @@ interface RespuestaVinculacion {
     IonTitle
   ]
 })
-export class DetallePacientePage {
+export class DetallePacientePage implements OnChanges {
+
   @Input() paciente: PacienteDetalle | null = null;
 
   @Output() regresar = new EventEmitter<void>();
@@ -98,8 +105,16 @@ export class DetallePacientePage {
   errorTelegram = false;
   enlaceTelegram = '';
 
+  // ---------- Fotografías ----------
+
+  fotoUrl: string | null = null;
+  cargandoFoto = false;
+  mensajeFoto = '';
+  errorFoto = false;
+
   constructor(
     private pacientesService: PacientesService,
+    private fotoPacienteService: FotoPacienteService,
     private cdr: ChangeDetectorRef
   ) {
     addIcons({
@@ -111,8 +126,145 @@ export class DetallePacientePage {
       createOutline,
       informationCircleOutline,
       linkOutline,
-      checkmarkCircleOutline
+      checkmarkCircleOutline,
+      cameraOutline,
+      imagesOutline
     });
+  }
+
+  // Detectar cuando cambia el paciente recibido
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['paciente']) {
+      this.cargarFotoPaciente();
+    }
+  }
+
+  // ---------- Cargar fotografía ----------
+
+  async cargarFotoPaciente(): Promise<void> {
+    this.fotoUrl = null;
+
+    const ruta = this.paciente?.foto;
+
+    if (!ruta) {
+      this.cdr.detectChanges();
+      return;
+    }
+
+    try {
+      this.fotoUrl =
+        await this.fotoPacienteService.obtenerUrlFoto(ruta);
+
+    } catch (error) {
+      console.error(
+        'Error al cargar la fotografía del paciente:',
+        error
+      );
+
+      this.fotoUrl = null;
+
+    } finally {
+      this.cdr.detectChanges();
+    }
+  }
+
+  // ---------- Tomar fotografía o elegir de galería ----------
+
+  async seleccionarFotografia(
+    origen: 'camara' | 'galeria'
+  ): Promise<void> {
+
+    const pacienteId = this.paciente?.id;
+
+    if (!pacienteId) {
+      this.mostrarMensajeFoto(
+        'No se encontró el paciente seleccionado.',
+        true
+      );
+      return;
+    }
+
+    if (this.cargandoFoto) {
+      return;
+    }
+
+    this.cargandoFoto = true;
+    this.mensajeFoto = '';
+    this.errorFoto = false;
+
+    try {
+      // Guardar la fotografía en el almacenamiento privado.
+      const nuevaRuta =
+        await this.fotoPacienteService.seleccionarFoto(
+          pacienteId,
+          origen
+        );
+
+      // Guardar la ruta en SQLite.
+      await this.pacientesService.actualizarFotoPaciente(
+        pacienteId,
+        nuevaRuta
+      );
+
+      // Conservar la ruta anterior para eliminarla después.
+      const rutaAnterior = this.paciente?.foto;
+
+      // Actualizar los datos del paciente en pantalla.
+      if (this.paciente) {
+        this.paciente.foto = nuevaRuta;
+      }
+
+      // Mostrar la nueva fotografía.
+      this.fotoUrl =
+        await this.fotoPacienteService.obtenerUrlFoto(
+          nuevaRuta
+        );
+
+      // Eliminar la fotografía anterior si existía.
+      if (rutaAnterior && rutaAnterior !== nuevaRuta) {
+        try {
+          await this.fotoPacienteService.eliminarFoto(
+            rutaAnterior
+          );
+        } catch (error) {
+          console.warn(
+            'No se pudo eliminar la fotografía anterior:',
+            error
+          );
+        }
+      }
+
+      this.mostrarMensajeFoto(
+        'Fotografía guardada correctamente.',
+        false
+      );
+
+    } catch (error) {
+      console.error(
+        'Error al guardar la fotografía:',
+        error
+      );
+
+      this.mostrarMensajeFoto(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo guardar la fotografía.',
+        true
+      );
+
+    } finally {
+      this.cargandoFoto = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private mostrarMensajeFoto(
+    mensaje: string,
+    esError: boolean
+  ): void {
+    this.mensajeFoto = mensaje;
+    this.errorFoto = esError;
+    this.cdr.detectChanges();
   }
 
   // ---------- Navegación ----------
@@ -157,7 +309,6 @@ export class DetallePacientePage {
     this.mensajeTelegram = '';
     this.errorTelegram = false;
 
-    // Limpiar el enlace anterior al generar uno nuevo.
     this.codigoVinculacion = '';
     this.enlaceTelegram = '';
 
@@ -181,17 +332,11 @@ export class DetallePacientePage {
         }
       );
 
-      const datos = await respuesta.json() as RespuestaCodigo;
+      const datos =
+        await respuesta.json() as RespuestaCodigo;
 
-      console.log(
-        'Estado HTTP:',
-        respuesta.status
-      );
-
-      console.log(
-        'Respuesta del backend:',
-        datos
-      );
+      console.log('Estado HTTP:', respuesta.status);
+      console.log('Respuesta del backend:', datos);
 
       if (!respuesta.ok) {
         throw new Error(
@@ -211,7 +356,6 @@ export class DetallePacientePage {
         );
       }
 
-      // Actualizar el estado del componente.
       this.codigoVinculacion = datos.codigo.trim();
       this.enlaceTelegram = datos.enlace.trim();
 
@@ -220,15 +364,8 @@ export class DetallePacientePage {
         false
       );
 
-      console.log(
-        'Código guardado:',
-        this.codigoVinculacion
-      );
-
-      console.log(
-        'Enlace guardado:',
-        this.enlaceTelegram
-      );
+      console.log('Código guardado:', this.codigoVinculacion);
+      console.log('Enlace guardado:', this.enlaceTelegram);
 
     } catch (error) {
       console.error(
@@ -247,8 +384,6 @@ export class DetallePacientePage {
 
     } finally {
       this.cargandoTelegram = false;
-
-      // Actualizar la vista de Angular.
       this.cdr.detectChanges();
 
       console.log(
@@ -296,10 +431,7 @@ export class DetallePacientePage {
       const datos =
         await respuesta.json() as RespuestaVinculacion;
 
-      console.log(
-        'Respuesta de verificación:',
-        datos
-      );
+      console.log('Respuesta de verificación:', datos);
 
       if (!respuesta.ok) {
         throw new Error(
@@ -316,24 +448,20 @@ export class DetallePacientePage {
         return;
       }
 
-      // Comprobar que el código pertenece al paciente actual.
       if (datos.pacienteId !== paciente.id) {
         throw new Error(
           'El código corresponde a otro paciente.'
         );
       }
 
-      // Guardar el chat en SQLite.
       await this.pacientesService.vincularTelegram(
         paciente.id,
         datos.chatId
       );
 
-      // Actualizar los datos mostrados.
       paciente.telegram_chat_id = datos.chatId;
       paciente.telegram_vinculado = 1;
 
-      // Consumir el código temporal.
       try {
         const eliminar = await fetch(
           `${this.API_URL}/vinculacion/${encodeURIComponent(codigo)}`,
@@ -417,7 +545,7 @@ export class DetallePacientePage {
     );
   }
 
-  // ---------- Mensajes ----------
+  // ---------- Mensajes de Telegram ----------
 
   private mostrarMensaje(
     mensaje: string,

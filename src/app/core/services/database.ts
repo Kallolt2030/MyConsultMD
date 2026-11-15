@@ -127,6 +127,7 @@ export class DatabaseService {
         telegram_vinculado INTEGER NOT NULL DEFAULT 0,
         fecha_registro TEXT DEFAULT CURRENT_TIMESTAMP
       )`,
+      
 
       `CREATE TABLE IF NOT EXISTS citas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -154,6 +155,8 @@ export class DatabaseService {
       await conexion.execute(sql);
     }
 
+    
+
     // Actualiza bases de datos existentes sin eliminar registros.
     await this.agregarColumnaSiNoExiste(
       conexion,
@@ -173,6 +176,13 @@ export class DatabaseService {
       conexion,
       'citas',
       'recordatorio_enviado_en',
+      'TEXT'
+    );
+
+    await this.agregarColumnaSiNoExiste(
+      conexion,
+      'pacientes',
+      'foto',
       'TEXT'
     );
 

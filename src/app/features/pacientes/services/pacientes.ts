@@ -10,6 +10,7 @@ export interface PacienteRegistro {
   telegram_chat_id?: string | null;
   telegram_vinculado?: number;
   fecha_registro?: string;
+  foto?: string | null;
 }
 
 @Injectable({
@@ -31,7 +32,8 @@ export class PacientesService {
         telegram,
         telegram_chat_id,
         telegram_vinculado,
-        fecha_registro
+        fecha_registro,
+        foto
        FROM pacientes
        ORDER BY nombre ASC`
     );
@@ -49,7 +51,8 @@ export class PacientesService {
         telegram,
         telegram_chat_id,
         telegram_vinculado,
-        fecha_registro
+        fecha_registro,
+        foto
        FROM pacientes
        WHERE id = ?`,
       [id]
@@ -72,7 +75,8 @@ export class PacientesService {
         telegram,
         telegram_chat_id,
         telegram_vinculado,
-        fecha_registro
+        fecha_registro,
+        foto
        FROM pacientes
        WHERE nombre LIKE ?
           OR telefono LIKE ?
@@ -117,6 +121,19 @@ export class PacientesService {
         paciente.telegram.trim(),
         id
       ]
+    );
+  }
+
+  // Guardar o actualizar la fotografía de un paciente
+  async actualizarFotoPaciente(
+    id: number,
+    foto: string
+  ): Promise<void> {
+    await this.databaseService.run(
+      `UPDATE pacientes
+       SET foto = ?
+       WHERE id = ?`,
+      [foto, id]
     );
   }
 

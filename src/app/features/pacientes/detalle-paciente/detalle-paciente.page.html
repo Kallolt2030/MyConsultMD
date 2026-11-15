@@ -18,43 +18,118 @@
     <ng-container *ngIf="paciente; else pacienteNoDisponible">
 
       <!-- Encabezado del perfil -->
-      <section class="rounded-2xl bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+      
+<!-- Encabezado del perfil -->
+<section class="rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
 
-          <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-blue-100">
-            <ion-icon
-              name="person-outline"
-              class="text-5xl text-blue-800">
-            </ion-icon>
-          </div>
+    <!-- Fotografía del paciente -->
+    <div class="flex h-28 w-28 shrink-0 items-center justify-center
+                overflow-hidden rounded-2xl bg-blue-100">
 
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium text-blue-700">
-              Perfil del paciente
-            </p>
+      <img
+        *ngIf="fotoUrl; else avatarDefault"
+        [src]="fotoUrl"
+        [alt]="'Fotografía de ' + paciente.nombre"
+        class="h-full w-full object-cover"
+      />
 
-            <h1 class="mt-1 break-words text-2xl font-bold text-slate-800">
-              {{ paciente.nombre }}
-            </h1>
+      <ng-template #avatarDefault>
+        <ion-icon
+          name="person-outline"
+          class="text-6xl text-blue-800">
+        </ion-icon>
+      </ng-template>
 
-            <p class="mt-2 text-sm text-slate-500">
-              Identificador: #{{ paciente.id }}
-            </p>
+    </div>
 
-            <ion-badge color="primary" class="mt-3">
-              Paciente registrado
-            </ion-badge>
-          </div>
+    <div class="min-w-0 flex-1">
+      <p class="text-sm font-medium text-blue-700">
+        Perfil del paciente
+      </p>
 
-          <ion-button
-            class="boton-editar"
-            (click)="editarPaciente()">
-            <ion-icon name="create-outline" slot="start"></ion-icon>
-            Editar
-          </ion-button>
+      <h1 class="mt-1 break-words text-2xl font-bold text-slate-800">
+        {{ paciente.nombre }}
+      </h1>
 
-        </div>
-      </section>
+      <p class="mt-2 text-sm text-slate-500">
+        Identificador: #{{ paciente.id }}
+      </p>
+
+      <ion-badge color="primary" class="mt-3">
+        Paciente registrado
+      </ion-badge>
+    </div>
+
+    <ion-button
+      class="boton-editar"
+      (click)="editarPaciente()">
+      <ion-icon name="create-outline" slot="start"></ion-icon>
+      Editar
+    </ion-button>
+
+  </div>
+
+  <!-- Acciones de fotografía -->
+  <div class="mt-5 border-t border-slate-100 pt-4">
+
+    <p class="mb-3 text-sm font-semibold text-slate-700">
+      Fotografía del paciente
+    </p>
+
+    <div class="flex flex-col gap-3 sm:flex-row">
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        (click)="seleccionarFotografia('camara')"
+        [disabled]="cargandoFoto">
+
+        <ion-icon
+          name="camera-outline"
+          slot="start">
+        </ion-icon>
+
+        Tomar fotografía
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        (click)="seleccionarFotografia('galeria')"
+        [disabled]="cargandoFoto">
+
+        <ion-icon
+          name="images-outline"
+          slot="start">
+        </ion-icon>
+
+        Elegir de galería
+      </ion-button>
+
+    </div>
+
+    <div
+      *ngIf="cargandoFoto"
+      class="mt-3 flex items-center gap-2 text-sm text-blue-700">
+
+      <ion-spinner name="crescent"></ion-spinner>
+      Guardando fotografía...
+    </div>
+
+    <div
+      *ngIf="mensajeFoto"
+      class="mt-3 rounded-lg p-3 text-sm"
+      [ngClass]="errorFoto
+        ? 'bg-red-50 text-red-700'
+        : 'bg-green-50 text-green-700'">
+
+      {{ mensajeFoto }}
+    </div>
+
+  </div>
+</section>
+
 
       <!-- Información de contacto -->
       <section class="space-y-3">

@@ -17,7 +17,7 @@ import {
   IonInput,
   IonSpinner,
   IonAlert,
-  IonItem,
+  IonItem
 } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
@@ -34,16 +34,18 @@ import {
   peopleOutline,
   refreshOutline
 } from 'ionicons/icons';
+
 import { PacientesService } from '../services/pacientes';
-
-
 
 export interface PacienteLista {
   id: number;
   nombre: string;
   telefono: string;
   telegram: string;
+  telegram_chat_id?: string | null;
+  telegram_vinculado?: number;
   fecha_registro?: string;
+  foto?: string | null;
 }
 
 @Component({
@@ -82,7 +84,7 @@ export class ListaPacientesComponent implements OnInit {
 
   constructor(
     private pacientesService: PacientesService,
-    private cdr:ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {
     addIcons({
       searchOutline,
@@ -102,42 +104,55 @@ export class ListaPacientesComponent implements OnInit {
     void this.cargarPacientes();
   }
 
-async cargarPacientes(): Promise<void> {
-  this.cargando = true;
-  this.error = '';
-  this.cdr.detectChanges();
-
-  try {
-    const resultado = await this.pacientesService.cargarPacientes();
-
-    this.pacientes = (resultado ?? [])
-      .filter(paciente => paciente.id !== undefined)
-      .map(paciente => ({
-        ...paciente,
-        id: paciente.id!
-      }));
-
-    console.log('[Pacientes] Cargados:', this.pacientes);
-  } catch (e) {
-    console.error('[Pacientes] Error al cargar:', e);
-    this.error = 'No se pudieron cargar los pacientes.';
-    this.pacientes = [];
-  } finally {
-    this.cargando = false;
+  // Cargar pacientes
+  async cargarPacientes(): Promise<void> {
+    this.cargando = true;
+    this.error = '';
     this.cdr.detectChanges();
 
-    console.log('[Pacientes] Estado final:', {
-      cargando: this.cargando,
-      total: this.pacientes.length,
-      filtrados: this.pacientesFiltrados.length
-    });
+    try {
+      const resultado =
+        await this.pacientesService.cargarPacientes();
+
+      this.pacientes = (resultado ?? [])
+        .filter(paciente => paciente.id !== undefined)
+        .map(paciente => ({
+          ...paciente,
+          id: paciente.id!
+        }));
+
+      console.log(
+        '[Pacientes] Cargados:',
+        this.pacientes
+      );
+
+    } catch (e) {
+      console.error(
+        '[Pacientes] Error al cargar:',
+        e
+      );
+
+      this.error = 'No se pudieron cargar los pacientes.';
+      this.pacientes = [];
+
+    } finally {
+      this.cargando = false;
+      this.cdr.detectChanges();
+
+      console.log('[Pacientes] Estado final:', {
+        cargando: this.cargando,
+        total: this.pacientes.length,
+        filtrados: this.pacientesFiltrados.length
+      });
+    }
   }
-}
 
+  // Actualizar lista al entrar
   async ionViewWillEnter(): Promise<void> {
-  await this.cargarPacientes();
-}
+    await this.cargarPacientes();
+  }
 
+  // Filtrar pacientes
   get pacientesFiltrados(): PacienteLista[] {
     const texto = this.busqueda.trim().toLowerCase();
 
@@ -152,23 +167,28 @@ async cargarPacientes(): Promise<void> {
     );
   }
 
+  // Abrir registro
   abrirRegistro(): void {
     this.registrar.emit();
   }
 
+  // Abrir detalle
   abrirDetalle(paciente: PacienteLista): void {
     this.verDetalle.emit(paciente);
   }
 
+  // Editar paciente
   editarPaciente(paciente: PacienteLista): void {
     this.editar.emit(paciente);
   }
 
+  // Confirmar eliminación
   confirmarEliminacion(paciente: PacienteLista): void {
     this.pacienteAEliminar = paciente;
     this.mostrarConfirmacion = true;
   }
 
+  // Eliminar paciente
   async eliminarPaciente(): Promise<void> {
     if (!this.pacienteAEliminar) {
       return;
@@ -183,25 +203,35 @@ async cargarPacientes(): Promise<void> {
       );
 
       this.pacientes = this.pacientes.filter(
-        paciente => paciente.id !== this.pacienteAEliminar?.id
+        paciente =>
+          paciente.id !== this.pacienteAEliminar?.id
       );
 
       this.mostrarConfirmacion = false;
       this.pacienteAEliminar = null;
 
       this.eliminado.emit();
+
     } catch (e) {
-      console.error('Error al eliminar paciente:', e);
+      console.error(
+        'Error al eliminar paciente:',
+        e
+      );
+
       this.error = 'No se pudo eliminar el paciente.';
+
     } finally {
       this.eliminando = false;
     }
   }
+
+  // Cancelar eliminación
   cancelarEliminacion(): void {
-  this.mostrarConfirmacion = false;
-  this.pacienteAEliminar = null;
+    this.mostrarConfirmacion = false;
+    this.pacienteAEliminar = null;
   }
 
+  // Confirmar eliminación
   async confirmarEliminarPaciente(): Promise<void> {
     await this.eliminarPaciente();
   }
