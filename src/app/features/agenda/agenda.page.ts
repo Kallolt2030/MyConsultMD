@@ -1,6 +1,7 @@
 import {
   Component,
   signal,
+  computed,
   ChangeDetectorRef,
   OnInit,
   OnDestroy
@@ -11,6 +12,11 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+import { FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+
 import {
   IonContent,
   IonHeader,
@@ -20,15 +26,12 @@ import {
   IonButton,
   ToastController,
   AlertController,
-  IonSpinner,
-  IonLabel,
-  IonItem
+  IonSpinner
 } from '@ionic/angular';
 
 import { CitaDetalle } from '../../core/models/cita';
 import { Agenda } from './services/agenda';
 import { AgendaRefreshService } from '../../core/services/agenda-refresh';
-
 
 @Component({
   selector: 'app-agenda',
@@ -39,20 +42,20 @@ import { AgendaRefreshService } from '../../core/services/agenda-refresh';
     CommonModule,
     FormsModule,
     RouterModule,
+    FullCalendarModule,
     IonContent,
     IonHeader,
     IonToolbar,
     IonIcon,
     IonSpinner,
-    IonLabel,
-    IonItem,
     IonBadge,
     IonButton
   ]
 })
 export class AgendaPage implements OnInit, OnDestroy {
 
-  fechaSeleccionada = new Date().toLocaleDateString('en-CA');
+  // ⬇️ Ahora es signal → la UI reacciona al cambio
+  fechaSeleccionada = signal(new Date().toLocaleDateString('en-CA'));
 
   citas = signal<CitaDetalle[]>([]);
   cargando = signal(false);
@@ -74,14 +77,11 @@ export class AgendaPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Capa 2: Subject (el detalle lo emite al volver)
     this.refreshSub = this.refreshService.refresh$.subscribe(() => {
       console.log('[AgendaPage] Refresh por Subject');
       void this.cargarCitas();
     });
 
-    // Capa 3: Router.events — cubre TODA navegación a /tabs/agenda
-    // aunque ionViewWillEnter no dispare (caché del outlet).
     this.routerSub = this.router.events
       .pipe(
         filter(e => e instanceof NavigationEnd),
@@ -103,7 +103,6 @@ export class AgendaPage implements OnInit, OnDestroy {
     this.routerSub?.unsubscribe();
   }
 
-  // Capa 1: se dispara al entrar al tab o con pop real
   async ionViewWillEnter(): Promise<void> {
     console.log('[AgendaPage] ionViewWillEnter');
     await this.cargarCitas();
@@ -125,7 +124,7 @@ export class AgendaPage implements OnInit, OnDestroy {
       do {
         this.refrescoPendiente = false;
 
-        const fecha = this.fechaSeleccionada;
+        const fecha = this.fechaSeleccionada();
         console.log('[AgendaPage] Consultando fecha:', fecha);
 
         const resultado = await this.agenda.cargarCitas(fecha);
@@ -144,10 +143,8 @@ export class AgendaPage implements OnInit, OnDestroy {
 
     } catch (error) {
       console.error('[AgendaPage] Error cargando citas:', error);
-
       this.errorCargandoCitas.set(true);
       this.cdr.detectChanges();
-
       await this.toast('No se pudieron cargar las citas', 'danger');
 
     } finally {
@@ -166,6 +163,44 @@ export class AgendaPage implements OnInit, OnDestroy {
 
   async onFechaChange(): Promise<void> {
     await this.cargarCitas();
+  }
+
+  /**
+   * Eventos que se pintan en el calendario:
+   *  - Un fondo azul en el día seleccionado
+   *  - Un bloque por cada cita del día con el color de su estado
+   */
+  eventosCalendario = computed(() => {
+    const fecha = this.fechaSeleccionada();
+    const lista = this.citas();
+
+    const resaltado = {
+      start: fecha,
+      allDay: true,
+      display: 'background' as const,
+      backgroundColor: '#dbeafe'
+    };
+
+    const eventosCitas = lista.map(c => ({
+      title: `${c.hora} · ${c.paciente}`,
+      start: fecha,
+      allDay: true,
+      backgroundColor: this.colorEstadoHex(c.estado),
+      borderColor: this.colorEstadoHex(c.estado),
+      textColor: '#ffffff',
+      extendedProps: { citaId: c.id }
+    }));
+
+    return [resaltado, ...eventosCitas];
+  });
+
+  colorEstadoHex(estado: string): string {
+    switch (estado) {
+      case 'realizada': return '#10b981';
+      case 'cancelada': return '#ef4444';
+      case 'pendiente':
+      default:          return '#f59e0b';
+    }
   }
 
   abrirNuevaCita(): void {
@@ -279,4 +314,27 @@ export class AgendaPage implements OnInit, OnDestroy {
     });
     await toast.present();
   }
+
+  calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, interactionPlugin],
+    initialView: 'dayGridMonth',
+    locale: 'es',
+    firstDay: 1,
+    height: 'auto',
+    selectable: true,
+
+    dateClick: (info) => {
+      console.log('[Calendar] Click en:', info.dateStr);
+      this.fechaSeleccionada.set(info.dateStr);
+      void this.onFechaChange();
+    },
+
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: ''
+    },
+
+    buttonText: { today: 'Hoy' }
+  };
 }

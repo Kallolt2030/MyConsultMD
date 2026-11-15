@@ -1,4 +1,3 @@
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -6,9 +5,9 @@ import {
   IonHeader,
   IonToolbar,
   IonIcon,
-  IonButton
+  IonButton,
 } from '@ionic/angular';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 
 import { CitaResumen } from '../../core/models/cita';
 import { Inicio } from './services/inicio';
@@ -30,6 +29,7 @@ import { Inicio } from './services/inicio';
 export class InicioPage implements OnInit {
   nombreConsultorio = '';
   nombreProfesional = '';
+  origenDatos: 'api' | 'local' = 'local';
   readonly fechaActual = new Date();
 
   totalCitas = 0;
@@ -40,7 +40,8 @@ export class InicioPage implements OnInit {
 
   constructor(
     private inicio: Inicio,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -48,45 +49,42 @@ export class InicioPage implements OnInit {
     await this.cargarDatosInicio();
   }
 
-  private async cargarDatosInicio(): Promise<void> {
-    try {
-      const datos = await this.inicio.cargarDatos();
-
-      console.log('[Inicio] Datos recibidos:', datos);
-
-      this.nombreConsultorio = datos.nombreConsultorio ?? '';
-      this.nombreProfesional = datos.nombreProfesional ?? '';
-      this.totalCitas = datos.totalCitas ?? 0;
-      this.citasPendientes = datos.citasPendientes ?? 0;
-      this.totalPacientes = datos.totalPacientes ?? 0;
-      this.proximasCitas = datos.proximasCitas ?? [];
-
-      this.cdr.detectChanges();
-
-      console.log('[Inicio] Consultorio:', this.nombreConsultorio);
-      console.log('[Inicio] Profesional:', this.nombreProfesional);
-    } catch (error) {
-      console.error('[Inicio] Error al cargar los datos:', error);
-    }
+  async ionViewWillEnter(): Promise<void> {
+    await this.sincronizarYCargar();
   }
 
-  async ionViewWillEnter(): Promise<void> {
+  /**
+   * 1. Empuja los datos locales a Firestore (silencioso, no bloquea si falla)
+   * 2. Carga los datos (usa API si ya están sincronizados, o SQLite local si no)
+   */
+  private async sincronizarYCargar(): Promise<void> {
+    // Sync en segundo plano (si el usuario está offline, falla en silencio)
+    this.inicio.sincronizarTodo()
+      .then(r => r && console.log('[Inicio] Sync OK:', r))
+      .catch(() => {});
+
+    // Cargar datos inmediatamente (la API puede tardar 1-2s en reflejar el sync)
     await this.cargarDatosInicio();
   }
 
-  irAAgenda(): void {
-    window.location.href = '/tabs/agenda';
-  }
+  private async cargarDatosInicio(): Promise<void> {
+  try {
+    const datos = await this.inicio.cargarDatos();
 
-  irPacientes(): void {
-    window.location.href = '/tabs/pacientes';
-  }
+    this.nombreConsultorio = datos.nombreConsultorio ?? '';
+    this.nombreProfesional = datos.nombreProfesional ?? '';
+    this.totalCitas = datos.totalCitas ?? 0;
+    this.citasPendientes = datos.citasPendientes ?? 0;
+    this.totalPacientes = datos.totalPacientes ?? 0;
+    this.proximasCitas = datos.proximasCitas ?? [];
+    this.origenDatos = datos.origenDatos ?? 'local';   // ⬅️ nuevo
 
-  verHistorial(): void {
-    window.location.href = '/tabs/historial';
+    this.cdr.detectChanges();
+  } catch (error) {
+    console.error('[Inicio] Error al cargar los datos:', error);
   }
-
-  abrirNuevaCita(): void {
-    window.location.href = '/tabs/agenda/nueva-cita';
+}
+irAAgenda(): void {
+    this.router.navigate(['tabs/agenda']);
   }
 }

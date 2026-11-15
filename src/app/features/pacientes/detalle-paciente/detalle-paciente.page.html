@@ -1,16 +1,19 @@
+<ion-header>
+  <ion-toolbar >
+    <ion-buttons slot="start">
+      <!-- ✅ Cambiado: ion-button que llama a volverAgenda() -->
+      <ion-button (click)="regresarALista()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Detalle paciente</ion-title>
+  </ion-toolbar>
+</ion-header>
 
 <ion-content class="contenido-detalle">
-  <div class="mx-auto max-w-3xl space-y-5 p-4 sm:p-6">
-
-    <!-- Regresar -->
-    <ion-button
-      fill="clear"
-      class="boton-regresar"
-      (click)="regresarALista()">
-      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
-      Volver a pacientes
-    </ion-button>
-
+  <div class="mx-auto max-w-5xl space-y-5 px-4 pt-4 sm:px-6 sm:pt-6">
+    
     <!-- Paciente encontrado -->
     <ng-container *ngIf="paciente; else pacienteNoDisponible">
 
@@ -78,7 +81,7 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- Telegram -->
+        <!-- Usuario de Telegram -->
         <ion-card class="tarjeta-detalle">
           <ion-card-content>
             <div class="flex items-start gap-4">
@@ -113,9 +116,11 @@
                 </p>
 
                 <p class="mt-1 font-semibold text-slate-800">
-                  {{ paciente.fecha_registro
-                    ? (paciente.fecha_registro | date:'dd/MM/yyyy')
-                    : 'Sin fecha registrada' }}
+                  {{
+                    paciente.fecha_registro
+                      ? (paciente.fecha_registro | date:'dd/MM/yyyy')
+                      : 'Sin fecha registrada'
+                  }}
                 </p>
               </div>
             </div>
@@ -123,7 +128,7 @@
         </ion-card>
       </section>
 
-      <!-- Aviso -->
+      <!-- Aviso informativo -->
       <div class="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
         <ion-icon
           name="information-circle-outline"
@@ -135,6 +140,148 @@
           registrados para este paciente.
         </p>
       </div>
+
+      <!-- Vinculación de Telegram -->
+      <section class="space-y-3">
+        <h2 class="px-1 text-lg font-bold text-slate-800">
+          Recordatorios por Telegram
+        </h2>
+
+        <ion-card class="tarjeta-detalle">
+          <ion-card-content>
+
+            <!-- Estado de la vinculación -->
+            <div class="flex items-start gap-3">
+              <div class="icono-detalle">
+                <ion-icon
+                  [name]="telegramVinculado
+                    ? 'checkmark-circle-outline'
+                    : 'link-outline'">
+                </ion-icon>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-slate-800">
+                  {{
+                    telegramVinculado
+                      ? 'Telegram vinculado'
+                      : 'Telegram sin vincular'
+                  }}
+                </p>
+
+                <p class="mt-1 text-sm text-slate-500">
+                  {{
+                    telegramVinculado
+                      ? 'Este paciente tiene un chat asociado para recibir recordatorios.'
+                      : 'Genera un enlace para vincular el chat del paciente.'
+                  }}
+                </p>
+
+                <ion-badge
+                  [color]="telegramVinculado ? 'success' : 'medium'"
+                  class="mt-2">
+                  {{ telegramVinculado ? 'Vinculado' : 'Pendiente' }}
+                </ion-badge>
+              </div>
+            </div>
+
+            <!-- Acciones de Telegram -->
+            <div class="mt-4 flex flex-col gap-3">
+
+              <!-- Generar enlace -->
+              <ion-button
+                expand="block"
+                (click)="generarEnlaceTelegram()"
+                [disabled]="cargandoTelegram || !paciente?.id">
+
+                <ion-spinner
+                  *ngIf="cargandoTelegram"
+                  name="crescent"
+                  slot="start">
+                </ion-spinner>
+
+                <ion-icon
+                  *ngIf="!cargandoTelegram"
+                  name="link-outline"
+                  slot="start">
+                </ion-icon>
+
+                {{
+                  cargandoTelegram
+                    ? 'Generando enlace...'
+                    : 'Generar enlace de vinculación'
+                }}
+              </ion-button>
+
+              <!-- Abrir el bot -->
+        
+<!-- Abrir Telegram -->
+              <ion-button
+                *ngIf="enlaceTelegram && enlaceTelegram.length > 0"
+                expand="block"
+                fill="outline"
+                type="button"
+                (click)="abrirTelegram()">
+
+                <ion-icon
+                  name="chatbubble-outline"
+                  slot="start">
+                </ion-icon>
+
+                Abrir Telegram
+              </ion-button>
+
+
+              <!-- Verificar vinculación -->
+              <ion-button
+                *ngIf="codigoVinculacion"
+                expand="block"
+                fill="outline"
+                color="success"
+                (click)="verificarVinculacionTelegram()"
+                [disabled]="cargandoTelegram">
+
+                <ion-icon
+                  name="checkmark-circle-outline"
+                  slot="start">
+                </ion-icon>
+
+                Verificar vinculación
+              </ion-button>
+
+              <!-- Código generado -->
+              <div
+                *ngIf="codigoVinculacion"
+                class="rounded-lg bg-slate-50 p-3 text-center">
+
+                <p class="text-sm text-slate-500">
+                  Código temporal
+                </p>
+
+                <p class="mt-1 text-xl font-bold tracking-widest text-slate-800">
+                  {{ codigoVinculacion }}
+                </p>
+
+                <p class="mt-2 text-xs text-slate-500">
+                  Expira en 10 minutos. Si expira, genera uno nuevo.
+                </p>
+              </div>
+
+              <!-- Mensajes de resultado -->
+              <div
+                *ngIf="mensajeTelegram"
+                class="rounded-lg p-3 text-sm"
+                [ngClass]="errorTelegram
+                  ? 'bg-red-50 text-red-700'
+                  : 'bg-blue-50 text-blue-800'">
+
+                {{ mensajeTelegram }}
+              </div>
+
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </section>
 
     </ng-container>
 

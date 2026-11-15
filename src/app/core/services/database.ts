@@ -39,11 +39,11 @@ export class DatabaseService {
   }
 
   private async estaAbierta(
-  conexion: SQLiteDBConnection
-): Promise<boolean> {
-  const estado = await conexion.isDBOpen();
-  return estado.result ?? false;
-}
+    conexion: SQLiteDBConnection
+  ): Promise<boolean> {
+    const estado = await conexion.isDBOpen();
+    return estado.result ?? false;
+  }
 
   private async crearConexion(): Promise<void> {
     console.log('[SQLite] Buscando conexión...');
@@ -76,7 +76,6 @@ export class DatabaseService {
     console.log('[SQLite] Estado antes de abrir:', abiertaAntes);
 
     if (!abiertaAntes) {
-      console.log('[SQLite] Ejecutando open()...');
       await conexion.open();
     }
 
@@ -92,7 +91,9 @@ export class DatabaseService {
 
     await this.createTables(conexion);
 
-    console.log('[SQLite] Base de datos inicializada correctamente.');
+    console.log(
+      '[SQLite] Base de datos inicializada correctamente.'
+    );
   }
 
   private async createTables(
@@ -122,6 +123,8 @@ export class DatabaseService {
         nombre TEXT NOT NULL,
         telefono TEXT,
         telegram TEXT,
+        telegram_chat_id TEXT,
+        telegram_vinculado INTEGER NOT NULL DEFAULT 0,
         fecha_registro TEXT DEFAULT CURRENT_TIMESTAMP
       )`,
 
@@ -135,6 +138,7 @@ export class DatabaseService {
         notas TEXT,
         estado TEXT DEFAULT 'pendiente',
         recordatorio_estado TEXT DEFAULT 'pendiente',
+        recordatorio_enviado_en TEXT,
         FOREIGN KEY (paciente_id)
           REFERENCES pacientes(id) ON DELETE CASCADE
       )`
@@ -150,7 +154,54 @@ export class DatabaseService {
       await conexion.execute(sql);
     }
 
-    console.log('[SQLite] Tablas verificadas correctamente.');
+    // Actualiza bases de datos existentes sin eliminar registros.
+    await this.agregarColumnaSiNoExiste(
+      conexion,
+      'pacientes',
+      'telegram_chat_id',
+      'TEXT'
+    );
+
+    await this.agregarColumnaSiNoExiste(
+      conexion,
+      'pacientes',
+      'telegram_vinculado',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
+
+    await this.agregarColumnaSiNoExiste(
+      conexion,
+      'citas',
+      'recordatorio_enviado_en',
+      'TEXT'
+    );
+
+    console.log(
+      '[SQLite] Tablas y columnas verificadas correctamente.'
+    );
+  }
+
+  private async agregarColumnaSiNoExiste(
+    conexion: SQLiteDBConnection,
+    tabla: string,
+    columna: string,
+    definicion: string
+  ): Promise<void> {
+    const resultado = await conexion.query(
+      `PRAGMA table_info(${tabla})`
+    );
+
+    const columnas = resultado.values ?? [];
+
+    if (!columnas.some((item: any) => item.name === columna)) {
+      await conexion.execute(
+        `ALTER TABLE ${tabla} ADD COLUMN ${columna} ${definicion}`
+      );
+
+      console.log(
+        `[SQLite] Columna agregada: ${tabla}.${columna}`
+      );
+    }
   }
 
   private async asegurarInicializada(): Promise<SQLiteDBConnection> {

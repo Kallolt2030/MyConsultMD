@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "722190731693",
+    "project_id": "myconsultmd",
+    "storage_bucket": "myconsultmd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722190731693:android:91a743fd48025075843924",
+        "android_client_info": {
+          "package_name": "com.myconsult.md"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSK5_VvfSe3hGGBx8Dtrs-bhRIy9Qi0sM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
